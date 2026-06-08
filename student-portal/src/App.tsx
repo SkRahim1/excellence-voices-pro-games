@@ -58,6 +58,11 @@ function App() {
     cancel();
   }, [selectedGame, onboarded, cancel]);
 
+  // Scroll to top on navigation/onboarding transitions
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedGame, onboarded]);
+
   // Cancel speech instantly if the daily lock engages
   useEffect(() => {
     if (dailyActiveSeconds >= 2400) {

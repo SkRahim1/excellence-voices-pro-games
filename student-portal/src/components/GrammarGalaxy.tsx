@@ -56,6 +56,11 @@ export const GrammarGalaxy: React.FC<GrammarGalaxyProps> = ({ onBackToDashboard 
     }
   }, [selectedLevel]);
 
+  // Scroll to top when switching between level map and active gameplay
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedLevel]);
+
   const currentLevel = selectedLevel !== null ? LEVELS[selectedLevel] : null;
   const currentSlide = currentLevel ? currentLevel.slides[currentSlideIndex] : null;
 

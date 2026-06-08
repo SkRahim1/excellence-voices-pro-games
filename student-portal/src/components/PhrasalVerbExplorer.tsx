@@ -47,6 +47,11 @@ export const PhrasalVerbExplorer: React.FC<PhrasalVerbExplorerProps> = ({ onBack
     }
   }, [selectedLevel]);
 
+  // Scroll to top when switching between level map and active gameplay
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedLevel]);
+
   const activeVerb = currentLevelVerbs[showStudyDeck ? currentStudyCardIndex : currentRound];
 
   // Auto-play voice narration for the Study deck cards

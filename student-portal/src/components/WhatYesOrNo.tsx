@@ -50,6 +50,11 @@ export const WhatYesOrNo: React.FC<WhatYesOrNoProps> = ({ onBackToDashboard }) =
     }
   }, [selectedLevel]);
 
+  // Scroll to top when switching between level map and active gameplay
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedLevel]);
+
   const activeLevelData = selectedLevel !== null ? WHAT_YES_OR_NO_LEVELS[selectedLevel] : null;
   const currentStudyDecks = activeLevelData?.studyDecks || [];
   const activeStudyCard = currentStudyDecks[currentStudyCardIndex] || null;

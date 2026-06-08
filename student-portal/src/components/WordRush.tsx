@@ -38,6 +38,11 @@ export const WordRush: React.FC<WordRushProps> = ({ onBackToDashboard }) => {
     }
   }, [selectedLevel]);
 
+  // Scroll to top when switching between level map and active gameplay
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedLevel]);
+
   // Tick countdown timer
   useEffect(() => {
     if (selectedLevel === null || levelCleared || checked) return;

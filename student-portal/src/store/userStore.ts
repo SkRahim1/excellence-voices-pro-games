@@ -124,7 +124,19 @@ export const useUserStore = create<UserState>()(
           onboarded: true,
           xp: 100, // starting bonus
           coins: 10,
-          streak: 1
+          streak: 1,
+          completedGames: [],
+          grammarGalaxyLevelIndex: 0,
+          grammarGalaxySlideIndex: 0,
+          phrasalVerbLevelIndex: 0,
+          modalLevelIndex: 0,
+          whatYesOrNoLevelIndex: 0,
+          wordRushLevelIndex: 0,
+          phonicsLevelIndex: 0,
+          modalTimeFusionLevelIndex: 0,
+          dailyActiveSeconds: 0,
+          lastActiveDate: '',
+          lastStreakUpdatedDate: '',
         })),
       tickActiveTime: (seconds) =>
         set((state) => {

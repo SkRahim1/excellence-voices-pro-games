@@ -51,6 +51,11 @@ export const ModalMind: React.FC<ModalMindProps> = ({ onBackToDashboard }) => {
     }
   }, [selectedLevel]);
 
+  // Scroll to top when switching between level map and active gameplay
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedLevel]);
+
   const activeStudyDeck = currentStudyDecks[currentStudyCardIndex];
   const activeQuizQuestion = currentQuizQuestions[currentRound];
 

@@ -32,6 +32,11 @@ export const PhonicsMatcher: React.FC<PhonicsMatcherProps> = ({ onBackToDashboar
     }
   }, [selectedLevel]);
 
+  // Scroll to top when switching between level map and active gameplay
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [selectedLevel]);
+
   const speakWord = (word: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
