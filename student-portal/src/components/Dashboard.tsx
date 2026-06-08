@@ -1,6 +1,7 @@
 import React from 'react';
 import { useUserStore } from '../store/userStore';
 import { Flame, Star, Coins, Play, CheckCircle, Settings } from 'lucide-react';
+import { getSchoolName } from '../data/schools';
 
 interface DashboardProps {
   onSelectGame: (gameId: string) => void;
@@ -130,7 +131,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
           </div>
           <div>
             <h1 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{name} ({grade})</h1>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{school}</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{getSchoolName(school)}</span>
           </div>
         </div>
 
@@ -242,7 +243,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-divider)', paddingBottom: '0.5rem' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
-                    🏆 {school || 'School'} Standings
+                    🏆 {getSchoolName(school) || 'School'} Standings
                   </h3>
                   <div style={{ fontSize: '0.85rem', color: 'var(--accent-cyan)', fontWeight: 800, textTransform: 'uppercase' }}>
                     Rank #{selfRank} of 4

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sun, Moon, Palette, HelpCircle, RotateCcw } from 'lucide-react';
+import { X, Sun, Moon, Palette, HelpCircle, LogOut } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
 
 interface SettingsModalProps {
@@ -13,13 +13,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenHel
     themeMode, 
     toggleTheme, 
     toggleThemeMode, 
-    resetAll 
+    logout 
   } = useUserStore();
 
-  const handleReset = () => {
-    if (window.confirm("Are you sure you want to reset all game progress, XP, and coins? This cannot be undone.")) {
-      resetAll();
-      window.location.reload();
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out of your profile? Your progress is saved in the cloud.")) {
+      logout();
+      onClose();
     }
   };
 
@@ -207,7 +207,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenHel
             </button>
           </div>
 
-          {/* Reset All Data Option */}
+          {/* Log Out Option */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -219,11 +219,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenHel
             gap: '1rem'
           }}>
             <div style={{ flex: 1 }}>
-              <h4 style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0, color: '#ef4444' }}>Reset Progress</h4>
-              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Reset streak, coins, and levels (cannot be undone)</p>
+              <h4 style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0, color: '#ef4444' }}>Log Out</h4>
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Sign out of your student profile on this device</p>
             </div>
             <button
-              onClick={handleReset}
+              onClick={handleLogout}
               style={{
                 background: 'rgba(239, 68, 68, 0.1)',
                 border: '1px solid #ef4444',
@@ -240,8 +240,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenHel
               }}
               className="hover-lift"
             >
-              <RotateCcw style={{ width: '16px', height: '16px' }} />
-              Reset All
+              <LogOut style={{ width: '16px', height: '16px' }} />
+              Log Out
             </button>
           </div>
 

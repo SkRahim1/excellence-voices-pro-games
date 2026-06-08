@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, HelpCircle, BookOpen, Clock, Flame, Trophy, Award } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
+import { getSchoolName } from '../data/schools';
 
 interface HelpModalProps {
   onClose: () => void;
@@ -28,7 +29,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ onClose }) => {
     {
       icon: <Trophy style={{ color: '#eab308' }} />,
       q: "How does the Leaderboard work?",
-      a: `It ranks you in real-time against classmates at ${school || 'your school'}. Sorting updates dynamically as you earn XP. Can you claim the 🥇 1st place?`
+      a: `It ranks you in real-time against classmates at ${getSchoolName(school) || 'your school'}. Sorting updates dynamically as you earn XP. Can you claim the 🥇 1st place?`
     },
     {
       icon: <Award style={{ color: '#10b981' }} />,

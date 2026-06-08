@@ -1,6 +1,7 @@
 import React from 'react';
 import { useUserStore } from '../store/userStore';
 import { Flame, Star, Coins, ShieldAlert } from 'lucide-react';
+import { getSchoolName } from '../data/schools';
 
 export const LockoutScreen: React.FC = () => {
   const { streak, xp, coins, school, name, theme } = useUserStore();
@@ -156,7 +157,7 @@ export const LockoutScreen: React.FC = () => {
         </div>
 
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-          Registered to: <strong>{school}</strong>
+          Registered to: <strong>{getSchoolName(school)}</strong>
         </p>
 
       </div>

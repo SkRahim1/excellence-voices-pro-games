@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSchoolName } from '../data/schools';
 
 interface CertificateProps {
   name: string;
@@ -225,7 +226,7 @@ export const Certificate: React.FC<CertificateProps> = ({
               {name || 'Karan'}
             </h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0 }}>
-              Student of <strong style={{ color: '#fff' }}>{school || 'Delhi Public School'}</strong>, <strong style={{ color: '#fff' }}>{grade || 'Grade 7'}</strong>
+              Student of <strong style={{ color: '#fff' }}>{getSchoolName(school) || 'Delhi Public School'}</strong>, <strong style={{ color: '#fff' }}>{grade || 'Grade 7'}</strong>
             </p>
           </div>
 
