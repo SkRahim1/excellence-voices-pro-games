@@ -1,0 +1,33 @@
+# Development Task Checklist - Excellence Voices Pro
+
+- `[ ]` **Phase 1: MVP Landing Page & Diagnostic Assessment (Week 1-2)**
+  - `[ ]` Initialize project structure (Vite + React, custom vanilla CSS styling)
+  - `[ ]` Create landing page layout (`pro.excellencevoices.in` desktop & mobile responsive)
+  - `[ ]` Integrate Web Speech API for voice diagnostics
+  - `[ ]` Build "English Fluency Diagnostic Quiz" (Vocabulary check + Speech recording analysis)
+  - `[ ]` Create lead generation submission form (capturing name, school, email, phone)
+  - `[ ]` Design report generator showing pronunciation score and confidence level
+- `[ ]` **Phase 2: Core Student Dashboard, Auth & First Games (Week 3-4)**
+  - `[ ]` Set up Firebase Authentication (Email/Password, Google Sign-in)
+  - `[ ]` Integrate Firestore databases for student profiles & progress tracking
+  - `[ ]` Build gamified adventure roadmap dashboard (age-adaptive UI)
+  - `[ ]` Implement active time tracking heartbeat logic to capture focused site usage
+  - `[ ]` Design visual 15-minute daily timer ring and Monday-Friday weekly tracker on the dashboard
+  - `[ ]` Build the forced weekly lockout dashboard modal with WhatsApp share triggers (parent & teacher redirects)
+  - `[ ]` Implement game 1: **Word Rush** (vocabulary speed matching)
+  - `[ ]` Implement game 2: **Grammar Galaxy** (drag-and-drop sentence puzzle)
+- `[ ]` **Phase 3: AI Voice Assistant & Course Roadmap (Week 5-6)**
+  - `[ ]` Build AI Conversation room with local text-to-speech reading prompting
+  - `[ ]` Integrate Web Speech recognition to capture and match answers to target phrases
+  - `[ ]` Build live speech pacing and volume analyzer indicators
+  - `[ ]` Create first 5 courses of the roadmap (Foundation, Fluency, and Presentation levels)
+- `[ ]` **Phase 4: Certification, Live Meet Integrations, Teacher Portal & Launch (Week 7-8)**
+  - `[ ]` Create school license code validation engine
+  - `[ ]` Build Teacher/Principal portal (class analytics, student report reviews)
+  - `[ ]` Integrate student active usage charts (15-min daily goals) for teacher inspection
+  - `[ ]` Integrate Zoom/Google Meet APIs to programmatically generate Saturday workshop links
+  - `[ ]` Build the "Join Saturday Live Class" dashboard banner for students
+  - `[ ]` Create attendance webhooks to log student workshop attendance into Firestore
+  - `[ ]` Generate dynamic PDF Certificates from client-side canvas
+  - `[ ]` Add global student leaderboards (XP and Game high scores)
+  - `[ ]` Deploy frontend and map `pro.excellencevoices.in` CNAME DNS pointer

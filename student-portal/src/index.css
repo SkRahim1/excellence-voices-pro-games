@@ -1,0 +1,353 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Default: Teen Cyberpunk Dark Mode */
+  --bg-gradient: radial-gradient(circle at 50% 15%, #1e1b4b 0%, #09090e 85%);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-border: 1px solid rgba(255, 255, 255, 0.08);
+  --card-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  
+  /* Text and Accents */
+  --text-main: #f3f4f6;
+  --text-muted: #94a3b8;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+  --accent-glow: rgba(6, 182, 212, 0.3);
+  
+  --font-family: 'Outfit', sans-serif;
+  --radius-card: 20px;
+  --radius-btn: 12px;
+  --border-width: 1px;
+  --border-style: solid;
+
+  --progress-bg: rgba(255, 255, 255, 0.1);
+  --btn-bg-ghost: rgba(255, 255, 255, 0.06);
+  --level-card-bg: rgba(255, 255, 255, 0.03);
+  --border-divider: rgba(255, 255, 255, 0.05);
+}
+
+:root.light-mode {
+  /* Teen White Mode (Light Mode) */
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --card-bg: #ffffff;
+  --card-border: 1px solid rgba(15, 23, 42, 0.08);
+  --card-glow: 0 8px 32px 0 rgba(15, 23, 42, 0.06);
+  
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --accent-cyan: #0284c7;
+  --accent-purple: #6366f1;
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+  --accent-glow: rgba(2, 132, 199, 0.15);
+  
+  --progress-bg: rgba(15, 23, 42, 0.08);
+  --btn-bg-ghost: rgba(15, 23, 42, 0.05);
+  --level-card-bg: rgba(15, 23, 42, 0.02);
+  --border-divider: rgba(15, 23, 42, 0.06);
+}
+
+:root.kids-theme {
+  /* Kids Soft Playful Mode */
+  --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  --card-bg: #ffffff;
+  --card-border: 3px solid #7dd3fc;
+  --card-glow: 0 10px 0px rgba(2, 132, 199, 0.15);
+  
+  --text-main: #0c4a6e;
+  --text-muted: #0284c7;
+  --accent-cyan: #0284c7;
+  --accent-purple: #f59e0b;
+  --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  --accent-glow: rgba(245, 158, 11, 0.3);
+  
+  --font-family: 'Fredoka', sans-serif;
+  --radius-card: 28px;
+  --radius-btn: 50px;
+  --border-width: 3px;
+  --border-style: solid;
+
+  --progress-bg: rgba(2, 132, 199, 0.1);
+  --btn-bg-ghost: rgba(2, 132, 199, 0.05);
+  --level-card-bg: #ffffff;
+  --border-divider: rgba(2, 132, 199, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.2s ease, box-shadow 0.4s ease;
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+/* Glassmorphism utility card */
+.glass-card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  box-shadow: var(--card-glow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-card);
+  padding: 1.75rem;
+}
+
+/* Premium Hover Actions */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Animated backgrounds & effects */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+/* Focus outline glow and Theme adaptions for inputs/selects */
+.input-focus-accent {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.input-focus-accent:focus {
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 12px var(--accent-glow) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Option element default styling under Teen mode */
+select.input-focus-accent option {
+  background: #1e1b4b;
+  color: #fff;
+}
+
+/* Kids theme input and select adaptations */
+.kids-theme .input-focus-accent {
+  background: #f0f9ff !important;
+  color: #0c4a6e !important;
+  border: 3px solid #7dd3fc !important;
+}
+
+.kids-theme .input-focus-accent:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.3) !important;
+  background: #e0f2fe !important;
+}
+
+.kids-theme select.input-focus-accent option {
+  background: #ffffff !important;
+  color: #0c4a6e !important;
+}
+
+/* Light theme input, select and option adaptations */
+.light-mode .input-focus-accent {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.15) !important;
+}
+
+.light-mode .input-focus-accent:focus {
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 12px var(--accent-glow) !important;
+  background: #ffffff !important;
+}
+
+.light-mode select.input-focus-accent option {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* --- Responsive Layout & Mobile Friendliness Utilities --- */
+
+/* Main App Wrapper Padding */
+.main-container {
+  padding: 2rem 1.5rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .main-container {
+    padding: 1.25rem 0.75rem;
+  }
+}
+
+/* Responsive Grid for Dashboard */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 2rem;
+  width: 100%;
+}
+
+@media (max-width: 850px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Responsive Game Card */
+.game-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  padding: 1.75rem;
+  width: 100%;
+}
+
+.game-card-content {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .game-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+  
+  .game-card-content {
+    align-items: flex-start;
+  }
+}
+
+/* Play & Resume Buttons Responsive Styling */
+.game-card-btn {
+  background: var(--btn-bg-ghost);
+  border: var(--card-border);
+  color: var(--text-main);
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.game-card-btn-text {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .game-card-btn {
+    width: 100%;
+    height: 40px;
+    border-radius: 20px;
+    gap: 0.5rem;
+    background: var(--accent-gradient);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+  
+  .game-card-btn-text {
+    display: inline;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+}
+
+.game-card-resume-btn {
+  background: var(--accent-gradient);
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  height: 40px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px var(--accent-glow);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+@media (max-width: 600px) {
+  .game-card-resume-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Responsive Options Grid for Quiz Games */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .options-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* Responsive Certificate Footer */
+.cert-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0 2rem;
+}
+
+@media (max-width: 600px) {
+  .cert-footer {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 0;
+  }
+}
+

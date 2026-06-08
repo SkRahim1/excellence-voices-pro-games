@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excellence Voices Pro - Teacher Dashboard Prototype</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --brand-primary: #1e3a8a;
+      --brand-secondary: #3b82f6;
+      --status-green: #10b981;
+      --status-yellow: #f59e0b;
+      --status-red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--brand-primary);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .grid-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--brand-secondary);
+      margin-top: 0.5rem;
+    }
+
+    /* Table layout */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .btn-review {
+      background: var(--brand-secondary);
+      border: none;
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .btn-review:hover {
+      background: var(--brand-primary);
+    }
+
+    /* Review Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .audio-player-mock {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .play-btn {
+      background: var(--brand-secondary);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .waveform-visual {
+      flex-grow: 1;
+      height: 20px;
+      background: repeating-linear-gradient(90deg, #cbd5e1, #cbd5e1 4px, transparent 4px, transparent 8px);
+    }
+
+    .script-comparison {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .word-correct {
+      color: var(--status-green);
+      font-weight: 600;
+    }
+
+    .word-error {
+      color: var(--status-red);
+      text-decoration: line-through;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+    }
+
+    .btn-submit {
+      background: var(--status-green);
+      border: none;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div>
+        <span class="brand-title">Excellence Voices Pro - Teacher Hub</span>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Delhi Public School | Instructor Panel</div>
+      </div>
+      <div>
+        <select class="form-control" style="width: 150px;">
+          <option>Grade 7-A</option>
+          <option>Grade 7-B</option>
+          <option>Grade 8-A</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Metrics row -->
+    <div class="grid-metrics">
+      <div class="metric-box">
+        <h3>Active Students</h3>
+        <div class="metric-value">42 / 45</div>
+      </div>
+      <div class="metric-box">
+        <h3>Class Avg Time (Wk)</h3>
+        <div class="metric-value">62 Mins</div>
+      </div>
+      <div class="metric-box">
+        <h3>Weekly Targets Met</h3>
+        <div class="metric-value">76%</div>
+      </div>
+    </div>
+
+    <!-- Student table -->
+    <div class="card">
+      <h2 style="margin-bottom: 1rem;">Student Progress Roster</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Weekly Streak</th>
+            <th>Active Time (Wk)</th>
+            <th>Current Module</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Aditya Sharma</strong></td>
+            <td>🔥 5 Days</td>
+            <td>78 mins</td>
+            <td>Unit 20: Directions</td>
+            <td><button class="btn-review" onclick="openReviewModal('Aditya Sharma', 92, 'Excuse me, could you tell me where the nearest metro station is?', 'Excuse me, could you tell me where the near-est metro station is?')">Review Speech</button></td>
+          </tr>
+          <tr>
+            <td><strong>Priya Patel</strong></td>
+            <td>🔥 4 Days</td>
+            <td>60 mins</td>
+            <td>Unit 20: Directions</td>
+            <td><button class="btn-review" onclick="openReviewModal('Priya Patel', 86, 'Could you tell me how to get to the library?', 'Could tell me how get to library?')">Review Speech</button></td>
+          </tr>
+          <tr>
+            <td><strong>Kabir Singh</strong></td>
+            <td>⚠️ 2 Days</td>
+            <td>28 mins</td>
+            <td>Unit 19: Small Talk</td>
+            <td><button class="btn-review" onclick="openReviewModal('Kabir Singh', 64, 'Nice to meet you, my name is Kabir.', 'Nice to meet you me name Kabir')">Review Speech</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Homework Assigner Card -->
+    <div class="card">
+      <h2>Assign Speaking Task</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Send custom speech challenges to all students in Grade 7-A.</p>
+      <div class="form-group">
+        <label>Target Speech Script</label>
+        <input type="text" class="form-control" placeholder="Enter target text student should read out loud (e.g. 'I would like to borrow a book.')">
+      </div>
+      <button class="btn-review" style="background: var(--brand-secondary);" onclick="alert('Assignment pushed to student dashboard!')">Push Assignment</button>
+    </div>
+
+  </div>
+
+  <!-- Review/Grading Modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-card">
+      <button class="close-btn" onclick="closeModal()">×</button>
+      <h2 id="modalStudentName" style="margin-bottom: 0.5rem;">Review Speech</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Review vocal match logs and adjust score overrides.</p>
+
+      <div class="audio-player-mock">
+        <button class="play-btn" onclick="playSpeechSynthesizer()">▶</button>
+        <div class="waveform-visual"></div>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">0:04</span>
+      </div>
+
+      <div class="form-group">
+        <label>Expected Target Text</label>
+        <p class="form-control" style="background: #f8fafc;" id="targetTextVal"></p>
+      </div>
+
+      <div class="form-group">
+        <label>AI Transcribed Matches (Highlights Errors)</label>
+        <div class="script-comparison" id="transcriptionCompare"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Adjust Evaluation Match (AI Score: <span id="aiScoreLabel">92</span>%)</label>
+        <input type="range" class="form-control" id="overrideScoreSlider" min="0" max="100" style="padding: 0;" oninput="updateScoreVal(this.value)">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+          <span>Current Score: <strong id="scoreDisplay">92%</strong></span>
+          <span>Status: <strong id="gradeStatus" style="color: var(--status-green);">Excellent</strong></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Feedback Comment</label>
+        <textarea class="form-control" rows="3" placeholder="Enter teacher feedback (e.g., 'Excellent pacing!')"></textarea>
+      </div>
+
+      <button class="btn-submit" onclick="submitEvaluation()">Save Evaluation</button>
+    </div>
+  </div>
+
+  <script>
+    let activeTargetText = "";
+    let activeTranscribedText = "";
+
+    function openReviewModal(name, score, targetText, transcribedText) {
+      document.getElementById('modalStudentName').innerText = `Review Speech: ${name}`;
+      document.getElementById('targetTextVal').innerText = targetText;
+      document.getElementById('aiScoreLabel').innerText = score;
+      document.getElementById('overrideScoreSlider').value = score;
+      document.getElementById('scoreDisplay').innerText = `${score}%`;
+
+      activeTargetText = targetText;
+      activeTranscribedText = transcribedText;
+
+      // Render custom html match highlights
+      renderMatches(targetText, transcribedText);
+      updateGradeStatus(score);
+
+      document.getElementById('reviewModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('reviewModal').style.display = 'none';
+    }
+
+    function updateScoreVal(val) {
+      document.getElementById('scoreDisplay').innerText = `${val}%`;
+      updateGradeStatus(val);
+    }
+
+    function updateGradeStatus(score) {
+      const el = document.getElementById('gradeStatus');
+      if (score >= 80) {
+        el.innerText = "Excellent";
+        el.style.color = "var(--status-green)";
+      } else if (score >= 60) {
+        el.innerText = "Moderate";
+        el.style.color = "var(--status-yellow)";
+      } else {
+        el.innerText = "Needs Focus";
+        el.style.color = "var(--status-red)";
+      }
+    }
+
+    function renderMatches(target, transcribed) {
+      const compareBox = document.getElementById('transcriptionCompare');
+      const targetWords = target.toLowerCase().split(' ');
+      const spokenWords = transcribed.toLowerCase().split(' ');
+      
+      let html = "";
+      spokenWords.forEach(word => {
+        // Clean word punctuation
+        const clean = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        
+        // Match check
+        const match = targetWords.some(tw => tw.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"") === clean);
+        if (match) {
+          html += `<span class="word-correct">${word}</span> `;
+        } else {
+          html += `<span class="word-error">${word}</span> `;
+        }
+      });
+      compareBox.innerHTML = html;
+    }
+
+    function playSpeechSynthesizer() {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(activeTargetText);
+        utterance.rate = 0.85; // Slow down slightly for clarity
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert("Speech synthesis is not supported on this browser.");
+      }
+    }
+
+    function submitEvaluation() {
+      alert("✓ Speech evaluation and override marks saved successfully!");
+      closeModal();
+    }
+  </script>
+</body>
+</html>
