@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
 import { Flame, Star, Coins, Play, CheckCircle, Settings } from 'lucide-react';
 import { getSchoolName } from '../data/schools';
+import { db, isFirebaseEnabled } from '../firebase/config';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { LeaderboardModal } from './LeaderboardModal';
 
 interface DashboardProps {
   onSelectGame: (gameId: string) => void;
@@ -27,6 +30,92 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     modalTimeFusionLevelIndex,
     dailyActiveSeconds
   } = useUserStore();
+
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const fetchLeaderboard = async () => {
+      if (!isFirebaseEnabled || !db || !school) {
+        // Fallback to static mock data if firebase is disabled
+        const mockData = [
+          { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200, isSelf: false },
+          { name: 'Amit', grade: grade || 'Grade 7', xp: 1800, isSelf: false },
+          { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500, isSelf: false },
+          { name: `${name} (You)`, grade: grade || 'Grade 7', xp: xp, isSelf: true }
+        ];
+        if (active) setLeaderboard(mockData.sort((a, b) => b.xp - a.xp));
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const q = query(collection(db, 'students'), where('school', '==', school));
+        const querySnapshot = await getDocs(q);
+        const playersList: any[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const isSelf = data.name === name || data.mobileNumber === useUserStore.getState().mobileNumber;
+          playersList.push({
+            name: isSelf ? `${name} (You)` : data.name,
+            grade: data.grade || 'Grade 7',
+            xp: data.xp || 0,
+            isSelf
+          });
+        });
+
+        // Ensure current student is present if not found in db query
+        if (!playersList.some(p => p.isSelf)) {
+          playersList.push({
+            name: `${name} (You)`,
+            grade: grade || 'Grade 7',
+            xp: xp,
+            isSelf: true
+          });
+        }
+
+        // Sort by XP descending
+        playersList.sort((a, b) => b.xp - a.xp);
+
+        // If there are fewer than 4 players, fill with realistic mock players
+        const baseMocks = [
+          { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200 },
+          { name: 'Amit', grade: grade || 'Grade 7', xp: 1800 },
+          { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500 },
+        ];
+        
+        let mockIndex = 0;
+        while (playersList.length < 4 && mockIndex < baseMocks.length) {
+          const mock = baseMocks[mockIndex++];
+          if (!playersList.some(p => p.name === mock.name)) {
+            playersList.push({ ...mock, isSelf: false });
+          }
+        }
+        playersList.sort((a, b) => b.xp - a.xp);
+
+        if (active) setLeaderboard(playersList);
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+        const mockData = [
+          { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200, isSelf: false },
+          { name: 'Amit', grade: grade || 'Grade 7', xp: 1800, isSelf: false },
+          { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500, isSelf: false },
+          { name: `${name} (You)`, grade: grade || 'Grade 7', xp: xp, isSelf: true }
+        ];
+        if (active) setLeaderboard(mockData.sort((a, b) => b.xp - a.xp));
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
+    return () => {
+      active = false;
+    };
+  }, [school, name, xp, grade]);
 
   const games = [
     {
@@ -220,100 +309,129 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
 
         {/* Excellence Standings Card */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1.5rem', gap: '1rem' }}>
-          {(() => {
-            const rawLeaderboard = [
-              { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200, isSelf: false },
-              { name: 'Amit', grade: grade || 'Grade 7', xp: 1800, isSelf: false },
-              { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500, isSelf: false },
-              { name: `${name} (You)`, grade: grade || 'Grade 7', xp: xp, isSelf: true }
-            ];
-            const sortedLeaderboard = [...rawLeaderboard].sort((a, b) => b.xp - a.xp);
-            const selfIndex = sortedLeaderboard.findIndex(p => p.isSelf);
-            const selfRank = selfIndex + 1;
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '120px', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+              Loading Standings...
+            </div>
+          ) : (
+            (() => {
+              const playersWithRank = leaderboard.map((p, idx) => ({ ...p, rank: idx + 1 }));
+              const selfIndex = playersWithRank.findIndex(p => p.isSelf);
+              const selfRank = selfIndex >= 0 ? selfIndex + 1 : 1;
+              const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : { name: name, grade: grade, xp: xp, isSelf: true, rank: 1 };
 
-            // Reorder for traditional podium visual: Rank 2, Rank 1, Rank 3, Rank 4
-            const podiumPositions = [
-              { player: sortedLeaderboard[1], rank: 2 },
-              { player: sortedLeaderboard[0], rank: 1 },
-              { player: sortedLeaderboard[2], rank: 3 },
-              { player: sortedLeaderboard[3], rank: 4 }
-            ];
+              let dashboardPlayers: any[] = [];
+              if (selfIndex <= 2 || selfIndex === -1) {
+                dashboardPlayers = playersWithRank.slice(0, 4);
+              } else {
+                dashboardPlayers = [
+                  ...playersWithRank.slice(0, 3),
+                  selfPlayer
+                ];
+              }
 
-            return (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-divider)', paddingBottom: '0.5rem' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
-                    🏆 {getSchoolName(school) || 'School'} Standings
-                  </h3>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--accent-cyan)', fontWeight: 800, textTransform: 'uppercase' }}>
-                    Rank #{selfRank} of 4
+              const podiumPositions = [
+                { player: dashboardPlayers[1], rank: dashboardPlayers[1]?.rank || 2 },
+                { player: dashboardPlayers[0], rank: dashboardPlayers[0]?.rank || 1 },
+                { player: dashboardPlayers[2], rank: dashboardPlayers[2]?.rank || 3 },
+                { player: dashboardPlayers[3], rank: dashboardPlayers[3]?.rank || 4 }
+              ];
+
+              return (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-divider)', paddingBottom: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
+                      🏆 {getSchoolName(school) || 'School'} Standings
+                    </h3>
+                    <button 
+                      onClick={() => setShowLeaderboardModal(true)}
+                      style={{ 
+                        fontSize: '0.78rem', 
+                        color: 'var(--accent-cyan)', 
+                        fontWeight: 800, 
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        background: 'rgba(6, 182, 212, 0.08)',
+                        border: '1px solid rgba(6, 182, 212, 0.2)',
+                        padding: '4px 10px',
+                        borderRadius: '20px',
+                        outline: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      Rank #{selfRank} of {playersWithRank.length} 🔍
+                    </button>
                   </div>
-                </div>
 
-                {/* Horizontal Podium Layout */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', alignItems: 'end', marginTop: '0.25rem', minHeight: '120px' }}>
-                  {podiumPositions.map((item, idx) => {
-                    const rank = item.rank;
-                    const player = item.player;
-                    if (!player) return null;
-                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '⚡';
-                    const isSelf = player.isSelf;
+                  {/* Horizontal Podium Layout */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', alignItems: 'end', marginTop: '0.25rem', minHeight: '120px' }}>
+                    {podiumPositions.map((item, idx) => {
+                      const rank = item.rank;
+                      const player = item.player;
+                      if (!player) return null;
+                      const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '⚡';
+                      const isSelf = player.isSelf;
 
-                    const barHeight = rank === 1 ? '55px' : rank === 2 ? '42px' : rank === 3 ? '32px' : '22px';
+                      const barHeight = rank === 1 ? '55px' : rank === 2 ? '42px' : rank === 3 ? '32px' : '22px';
 
-                    return (
-                      <div 
-                        key={idx} 
-                        style={{ 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          alignItems: 'center', 
-                          textAlign: 'center'
-                        }}
-                      >
-                        {/* Name & Medal */}
-                        <div style={{ 
-                          fontSize: '0.75rem', 
-                          fontWeight: isSelf ? 800 : 600, 
-                          color: isSelf ? 'var(--accent-cyan)' : 'var(--text-main)',
-                          maxWidth: '75px',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          marginBottom: '0.25rem'
-                        }}>
-                          {rankEmoji} {player.name.replace(' (You)', '')}
+                      return (
+                        <div 
+                          key={idx} 
+                          style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            textAlign: 'center',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => setShowLeaderboardModal(true)}
+                        >
+                          {/* Name & Medal */}
+                          <div style={{ 
+                            fontSize: '0.75rem', 
+                            fontWeight: isSelf ? 800 : 600, 
+                            color: isSelf ? 'var(--accent-cyan)' : 'var(--text-main)',
+                            maxWidth: '75px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            marginBottom: '0.25rem'
+                          }}>
+                            {rankEmoji} {player.name.replace(' (You)', '')}
+                          </div>
+
+                          {/* XP value */}
+                          <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 700 }}>
+                            {player.xp} XP
+                          </div>
+
+                          {/* Podium Pillar */}
+                          <div style={{
+                            width: '100%',
+                            height: barHeight,
+                            background: isSelf ? 'var(--accent-gradient)' : 'var(--level-card-bg)',
+                            border: isSelf ? '1.5px solid var(--accent-cyan)' : '1px solid var(--border-divider)',
+                            borderRadius: '8px 8px 0 0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: isSelf ? '#fff' : 'var(--text-muted)',
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            boxShadow: isSelf ? '0 -4px 10px var(--accent-glow)' : 'none'
+                          }}>
+                            #{rank}
+                          </div>
                         </div>
-
-                        {/* XP value */}
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 700 }}>
-                          {player.xp} XP
-                        </div>
-
-                        {/* Podium Pillar */}
-                        <div style={{
-                          width: '100%',
-                          height: barHeight,
-                          background: isSelf ? 'var(--accent-gradient)' : 'var(--level-card-bg)',
-                          border: isSelf ? '1.5px solid var(--accent-cyan)' : '1px solid var(--border-divider)',
-                          borderRadius: '8px 8px 0 0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: isSelf ? '#fff' : 'var(--text-muted)',
-                          fontSize: '0.75rem',
-                          fontWeight: 800,
-                          boxShadow: isSelf ? '0 -4px 10px var(--accent-glow)' : 'none'
-                        }}>
-                          #{rank}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            );
-          })()}
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()
+          )}
         </div>
 
       </div>
@@ -508,6 +626,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
           })}
         </div>
       </div>
+      
+      {showLeaderboardModal && (
+        <LeaderboardModal 
+          onClose={() => setShowLeaderboardModal(false)} 
+          leaderboard={leaderboard} 
+        />
+      )}
     </div>
   );
 };
