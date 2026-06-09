@@ -286,7 +286,11 @@ export const useUserStore = create<UserState>()(
               lastStreakUpdatedDate: lastStreakDate
             };
 
-            syncStoreToCloud(updates);
+            // Throttle database writes: Only write to Firestore every 30 seconds,
+            // or immediately when the daily lockout threshold (2400 seconds) is reached.
+            if (newActiveSeconds % 30 === 0 || newActiveSeconds >= 2400) {
+              syncStoreToCloud(updates);
+            }
 
             return updates;
           }),
