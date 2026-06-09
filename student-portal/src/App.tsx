@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUserStore } from './store/userStore';
+import { useUserStore, getTodayDateString } from './store/userStore';
 import { Dashboard } from './components/Dashboard';
 import { GrammarGalaxy } from './components/GrammarGalaxy';
 import { WordRush } from './components/WordRush';
@@ -19,7 +19,7 @@ function App() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, tickActiveTime, checkDailyReset } = useUserStore();
+  const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, lastActiveDate, tickActiveTime, checkDailyReset } = useUserStore();
   const { cancel } = useSpeech();
 
   // Sync theme class with HTML element
@@ -81,8 +81,12 @@ function App() {
   const verificationHash = (name || 'Karan').toUpperCase().split('').reduce((acc, char) => acc + char.charCodeAt(0), 100);
   const certId = `EV-GG-EASY-${verificationHash}`;
 
+  // Check if the calendar day has changed (synchronous reset override)
+  const today = getTodayDateString();
+  const isNewDay = lastActiveDate && lastActiveDate !== today;
+
   // If daily practice limit of 40 minutes (2400 seconds) is reached, lock the portal
-  if (onboarded && dailyActiveSeconds >= 2400) {
+  if (onboarded && dailyActiveSeconds >= 2400 && !isNewDay) {
     return <LockoutScreen />;
   }
 

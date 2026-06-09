@@ -3,6 +3,14 @@ import { persist } from 'zustand/middleware';
 import { db, isFirebaseEnabled } from '../firebase/config';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
+export const getTodayDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface UserState {
   name: string;
   grade: string;
@@ -252,7 +260,7 @@ export const useUserStore = create<UserState>()(
         },
         tickActiveTime: (seconds) =>
           set((state) => {
-            const today = new Date().toLocaleDateString('en-CA');
+            const today = getTodayDateString();
             let currentActiveSeconds = state.dailyActiveSeconds;
             let currentStreak = state.streak;
             let lastStreakDate = state.lastStreakUpdatedDate;
@@ -283,7 +291,7 @@ export const useUserStore = create<UserState>()(
             return updates;
           }),
         checkDailyReset: () => {
-          const today = new Date().toLocaleDateString('en-CA');
+          const today = getTodayDateString();
           const state = get();
           if (!state.lastActiveDate || state.lastActiveDate !== today) {
             const updates = {
