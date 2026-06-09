@@ -44,6 +44,7 @@ interface UserState {
   registerStudent: (details: { name: string; grade: string; school: string; mobileNumber: string }) => void;
   loginStudent: (mobileNumber: string) => Promise<boolean>;
   tickActiveTime: (seconds: number) => void;
+  checkDailyReset: () => void;
   resetAll: () => void;
   logout: () => void;
 }
@@ -281,6 +282,18 @@ export const useUserStore = create<UserState>()(
 
             return updates;
           }),
+        checkDailyReset: () => {
+          const today = new Date().toLocaleDateString('en-CA');
+          const state = get();
+          if (!state.lastActiveDate || state.lastActiveDate !== today) {
+            const updates = {
+              dailyActiveSeconds: 0,
+              lastActiveDate: today
+            };
+            set(() => updates);
+            syncStoreToCloud(updates);
+          }
+        },
         resetAll: () => {
           const mobile = get().mobileNumber;
           if (isFirebaseEnabled && db && mobile) {

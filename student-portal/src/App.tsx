@@ -19,7 +19,7 @@ function App() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, tickActiveTime } = useUserStore();
+  const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, tickActiveTime, checkDailyReset } = useUserStore();
   const { cancel } = useSpeech();
 
   // Sync theme class with HTML element
@@ -69,6 +69,13 @@ function App() {
       cancel();
     }
   }, [dailyActiveSeconds, cancel]);
+
+  // Check and reset daily screen-time limit if the calendar day has changed
+  useEffect(() => {
+    if (onboarded) {
+      checkDailyReset();
+    }
+  }, [onboarded, checkDailyReset]);
 
   // Unique certificate identifier based on the student's name
   const verificationHash = (name || 'Karan').toUpperCase().split('').reduce((acc, char) => acc + char.charCodeAt(0), 100);
