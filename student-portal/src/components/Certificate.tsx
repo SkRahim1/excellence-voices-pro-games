@@ -9,7 +9,77 @@ interface CertificateProps {
   onReplay: () => void;
   onBackToDashboard: () => void;
   isPreview?: boolean;
+  gameId?: 'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion';
 }
+
+interface GameCertMetadata {
+  level: string;
+  title: string;
+  color: string;
+  shadowColor: string;
+  gradientStart: string;
+  gradientEnd: string;
+  details: string;
+}
+
+const gameMetadata: Record<'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion', GameCertMetadata> = {
+  'grammar-galaxy': {
+    level: 'Foundational Level (Easy)',
+    title: 'Time Expression Master',
+    color: '#10b981',
+    shadowColor: 'rgba(16, 185, 129, 0.15)',
+    gradientStart: '#10b981',
+    gradientEnd: '#059669',
+    details: 'Demonstrating outstanding skills in spoken sentence formation using key temporal and conditional structures, covering Everyday routines, Completed past actions, Future plans, Timelines, and imaginary outcomes.'
+  },
+  'modal-mind': {
+    level: 'Medium Level 1',
+    title: 'Modal Mind Master',
+    color: '#8b5cf6',
+    shadowColor: 'rgba(139, 92, 246, 0.15)',
+    gradientStart: '#8b5cf6',
+    gradientEnd: '#6d28d9',
+    details: 'Demonstrating exceptional command over modal auxiliary verbs including capability, request, permission, obligation, and suggestion, applied across interactive real-world scenarios.'
+  },
+  'what-yes-or-no': {
+    level: 'Medium Level 2',
+    title: 'What Yes or No? Conversational Master',
+    color: '#06b6d4',
+    shadowColor: 'rgba(6, 182, 212, 0.15)',
+    gradientStart: '#06b6d4',
+    gradientEnd: '#0369a1',
+    details: 'Demonstrating professional mastery in formulating and responding to conversational polar Yes/No questions, managing politeness registers, past/present/future tenses, and conditional clauses.'
+  },
+  'modal-time-fusion': {
+    level: 'Advanced Level',
+    title: 'Modal Time Fusion: Advanced Master',
+    color: '#d946ef',
+    shadowColor: 'rgba(217, 70, 239, 0.15)',
+    gradientStart: '#d946ef',
+    gradientEnd: '#be185d',
+    details: 'Demonstrating supreme expertise in constructing complex English sentences using advanced double-blank syntax frames, merging modal verbs with conditional timelines, perfect tenses, and temporal adverbs.'
+  }
+};
+
+const wrapText = (context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) => {
+  const words = text.split(' ');
+  let line = '';
+  let currentY = y;
+
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = context.measureText(testLine);
+    const testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      context.fillText(line, x, currentY);
+      line = words[n] + ' ';
+      currentY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  context.fillText(line, x, currentY);
+};
 
 export const Certificate: React.FC<CertificateProps> = ({
   name,
@@ -18,8 +88,10 @@ export const Certificate: React.FC<CertificateProps> = ({
   certId,
   onReplay,
   onBackToDashboard,
-  isPreview = false
+  isPreview = false,
+  gameId = 'grammar-galaxy'
 }) => {
+  const meta = gameMetadata[gameId] || gameMetadata['grammar-galaxy'];
   const downloadCertificateAsImage = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 1600;
@@ -40,7 +112,7 @@ export const Certificate: React.FC<CertificateProps> = ({
       ctx.fillRect(0, 0, 1600, 1100);
 
       // Draw borders
-      const borderColor = isPreview ? '#6b7280' : '#10b981';
+      const borderColor = isPreview ? '#6b7280' : meta.color;
       ctx.strokeStyle = borderColor;
       ctx.lineWidth = 12;
       ctx.strokeRect(30, 30, 1540, 1040);
@@ -76,7 +148,7 @@ export const Certificate: React.FC<CertificateProps> = ({
       ctx.translate(800, 550);
       ctx.rotate(-25 * Math.PI / 180);
       ctx.font = '900 110px sans-serif';
-      ctx.fillStyle = isPreview ? '#ef4444' : '#10b981';
+      ctx.fillStyle = isPreview ? '#ef4444' : meta.color;
       ctx.globalAlpha = isPreview ? 0.08 : 0.03;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -113,9 +185,9 @@ export const Certificate: React.FC<CertificateProps> = ({
         gradient.addColorStop(0.5, '#d1d5db');
         gradient.addColorStop(1, '#4b5563');
       } else {
-        gradient.addColorStop(0, '#10b981');
-        gradient.addColorStop(0.5, '#34d399');
-        gradient.addColorStop(1, '#059669');
+        gradient.addColorStop(0, meta.gradientStart);
+        gradient.addColorStop(0.5, '#ffffff'); // add a bright highlight in the center
+        gradient.addColorStop(1, meta.gradientEnd);
       }
       ctx.fillStyle = gradient;
       ctx.textAlign = 'center';
@@ -163,16 +235,15 @@ export const Certificate: React.FC<CertificateProps> = ({
       ctx.fillStyle = '#f8fafc';
       ctx.fillText('for successfully completing the course curriculum and mastering the', 800, 630);
 
-      // Time Expression Master...
-      ctx.font = 'bold 36px sans-serif';
-      ctx.fillStyle = '#06b6d4'; // accent-cyan
-      ctx.fillText('TIME EXPRESSION MASTER: FOUNDATIONAL LEVEL (EASY)', 800, 690);
+      // Course Name and Level
+      ctx.font = 'bold 34px sans-serif';
+      ctx.fillStyle = meta.color;
+      ctx.fillText(`${meta.title.toUpperCase()}: ${meta.level.toUpperCase()}`, 800, 690);
 
-      // Course details
+      // Course details (dynamic wrap)
       ctx.font = '22px sans-serif';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText('Demonstrating outstanding skills in spoken sentence formation using key temporal and conditional', 800, 755);
-      ctx.fillText('structures, covering Everyday routines, Completed past actions, Future plans, Timelines, and imaginary outcomes.', 800, 785);
+      wrapText(ctx, meta.details, 800, 755, 1200, 32);
 
       // Footer divider line
       ctx.strokeStyle = 'rgba(255,255,255,0.06)';
@@ -198,7 +269,7 @@ export const Certificate: React.FC<CertificateProps> = ({
       // --- Right Footer: Signature ---
       ctx.textAlign = 'right';
       ctx.font = 'italic 44px "Great Vibes", cursive';
-      ctx.fillStyle = isPreview ? '#94a3b8' : '#34d399';
+      ctx.fillStyle = isPreview ? '#94a3b8' : meta.color;
       ctx.fillText('Excellence Voices', 1450, 910);
       
       // Signature line
@@ -296,7 +367,7 @@ export const Certificate: React.FC<CertificateProps> = ({
             box-sizing: border-box;
             background: #0f172a !important;
             color: #f8fafc !important;
-            border: 10px double #10b981 !important;
+            border: 10px double ${meta.color} !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
@@ -313,13 +384,13 @@ export const Certificate: React.FC<CertificateProps> = ({
       `}} />
 
       <div className="glass-card animate-pulse-slow" style={{ textAlign: 'center', padding: '1.5rem', width: '100%' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: isPreview ? 'var(--accent-purple)' : '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-          {isPreview ? '🔒 Certificate Preview' : '🏆 Foundational Course Mastered!'}
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: isPreview ? 'var(--accent-purple)' : meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          {isPreview ? '🔒 Certificate Preview' : `🏆 ${meta.title} Cleared!`}
         </h2>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
           {isPreview 
-            ? 'Complete all 11 levels of time expressions to unlock your official verified certificate.' 
-            : 'Fantastic effort! You completed all 11 levels of time expressions. Below is your official certificate.'
+            ? `Complete all levels of ${meta.title} to unlock your official verified certificate.` 
+            : `Fantastic effort! You completed all levels of ${meta.title}. Below is your official certificate.`
           }
         </p>
       </div>
@@ -331,10 +402,10 @@ export const Certificate: React.FC<CertificateProps> = ({
           width: '100%',
           maxWidth: '800px',
           background: 'radial-gradient(circle at center, #111827 0%, #030712 100%)',
-          border: isPreview ? '6px double #6b7280' : '6px double #10b981',
+          border: isPreview ? '6px double #6b7280' : `6px double ${meta.color}`,
           borderRadius: '20px',
           padding: '3rem 2.5rem',
-          boxShadow: isPreview ? '0 10px 40px rgba(0, 0, 0, 0.4)' : '0 10px 40px rgba(16, 185, 129, 0.15)',
+          boxShadow: isPreview ? '0 10px 40px rgba(0, 0, 0, 0.4)' : `0 10px 40px ${meta.shadowColor}`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -345,14 +416,14 @@ export const Certificate: React.FC<CertificateProps> = ({
           textAlign: 'center',
           borderImage: isPreview 
             ? 'linear-gradient(to bottom right, #6b7280, #374151) 10'
-            : 'linear-gradient(to bottom right, #10b981, #059669) 10'
+            : `linear-gradient(to bottom right, ${meta.gradientStart}, ${meta.gradientEnd}) 10`
         }}
       >
         {/* Corner Decorative Ornaments */}
-        <div style={{ position: 'absolute', top: '15px', left: '15px', width: '30px', height: '30px', borderTop: isPreview ? '3px solid #6b7280' : '3px solid #10b981', borderLeft: isPreview ? '3px solid #6b7280' : '3px solid #10b981' }} />
-        <div style={{ position: 'absolute', top: '15px', right: '15px', width: '30px', height: '30px', borderTop: isPreview ? '3px solid #6b7280' : '3px solid #10b981', borderRight: isPreview ? '3px solid #6b7280' : '3px solid #10b981' }} />
-        <div style={{ position: 'absolute', bottom: '15px', left: '15px', width: '30px', height: '30px', borderBottom: isPreview ? '3px solid #6b7280' : '3px solid #10b981', borderLeft: isPreview ? '3px solid #6b7280' : '3px solid #10b981' }} />
-        <div style={{ position: 'absolute', bottom: '15px', right: '15px', width: '30px', height: '30px', borderBottom: isPreview ? '3px solid #6b7280' : '3px solid #10b981', borderRight: isPreview ? '3px solid #6b7280' : '3px solid #10b981' }} />
+        <div style={{ position: 'absolute', top: '15px', left: '15px', width: '30px', height: '30px', borderTop: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}`, borderLeft: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}` }} />
+        <div style={{ position: 'absolute', top: '15px', right: '15px', width: '30px', height: '30px', borderTop: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}`, borderRight: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}` }} />
+        <div style={{ position: 'absolute', bottom: '15px', left: '15px', width: '30px', height: '30px', borderBottom: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}`, borderLeft: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}` }} />
+        <div style={{ position: 'absolute', bottom: '15px', right: '15px', width: '30px', height: '30px', borderBottom: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}`, borderRight: isPreview ? '3px solid #6b7280' : `3px solid ${meta.color}` }} />
 
         {/* Elegant Watermark Background */}
         <div style={{
@@ -373,7 +444,7 @@ export const Certificate: React.FC<CertificateProps> = ({
             transform: 'rotate(-25deg)',
             fontSize: isPreview ? '5.5rem' : '6.5rem',
             fontWeight: 900,
-            color: isPreview ? '#ef4444' : '#10b981',
+            color: isPreview ? '#ef4444' : meta.color,
             opacity: isPreview ? 0.08 : 0.03,
             whiteSpace: 'nowrap',
             letterSpacing: '0.15em',
@@ -434,7 +505,7 @@ export const Certificate: React.FC<CertificateProps> = ({
               letterSpacing: '0.05em',
               background: isPreview
                 ? 'linear-gradient(135deg, #9ca3af 0%, #d1d5db 50%, #4b5563 100%)'
-                : 'linear-gradient(135deg, #10b981 0%, #34d399 50%, #059669 100%)',
+                : `linear-gradient(135deg, ${meta.gradientStart} 0%, #ffffff 50%, ${meta.gradientEnd} 100%)`,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               textTransform: 'uppercase',
@@ -480,11 +551,11 @@ export const Certificate: React.FC<CertificateProps> = ({
             <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', margin: 0 }}>
               for successfully completing the course curriculum and mastering the
             </p>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--accent-cyan)', margin: '0.5rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Time Expression Master: Foundational Level (Easy)
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: meta.color, margin: '0.5rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {meta.title}: {meta.level}
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
-              Demonstrating outstanding skills in spoken sentence formation using key temporal and conditional structures, covering Everyday routines, Completed past actions, Future plans, Timelines, and imaginary outcomes.
+              {meta.details}
             </p>
           </div>
 
@@ -523,7 +594,7 @@ export const Certificate: React.FC<CertificateProps> = ({
               <div style={{ 
                 fontFamily: "'Great Vibes', cursive", 
                 fontSize: '1.8rem', 
-                color: isPreview ? '#9ca3af' : '#34d399',
+                color: isPreview ? '#9ca3af' : meta.color,
                 lineHeight: 1,
                 marginBottom: '0.25rem',
                 letterSpacing: '0.05em'
@@ -573,7 +644,7 @@ export const Certificate: React.FC<CertificateProps> = ({
                 boxShadow: '0 4px 15px var(--accent-glow)'
               }}
             >
-              Start Time Expression Master to Unlock 🚀
+              Start {meta.title} to Unlock 🚀
             </button>
           </>
         ) : (

@@ -520,11 +520,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                       <span style={{ color: 'var(--text-muted)' }}>⏱️ {game.duration}</span>
                       <span style={{ color: 'var(--accent-cyan)' }}>⭐ +{game.xpReward} XP</span>
                       <span style={{ color: '#eab308' }}>🏆 {game.difficulty}</span>
-                      {game.id === 'grammar-galaxy' && (
+                      {['grammar-galaxy', 'modal-mind', 'what-yes-or-no', 'modal-time-fusion'].includes(game.id) && (
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            onSelectGame('view-certificate');
+                            onSelectGame(`view-certificate-${game.id}`);
                           }}
                           style={{
                             background: 'rgba(16, 185, 129, 0.12)',

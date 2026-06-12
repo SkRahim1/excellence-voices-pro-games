@@ -104,7 +104,6 @@ function App() {
 
   // Unique certificate identifier based on the student's name
   const verificationHash = (name || 'Karan').toUpperCase().split('').reduce((acc, char) => acc + char.charCodeAt(0), 100);
-  const certId = `EV-GG-EASY-${verificationHash}`;
 
   // Check if the calendar day has changed (synchronous reset override)
   const today = getTodayDateString();
@@ -177,17 +176,33 @@ function App() {
             <RiyanStoryGame onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
-          {selectedGame === 'view-certificate' && (
-            <Certificate
-              name={name}
-              grade={grade}
-              school={school}
-              certId={certId}
-              isPreview={!completedGames.includes('grammar-galaxy')}
-              onReplay={() => handleGameSelectState('grammar-galaxy')}
-              onBackToDashboard={() => handleGameSelectState(null)}
-            />
-          )}
+          {(selectedGame === 'view-certificate' || selectedGame?.startsWith('view-certificate-')) && (() => {
+            const gameId = selectedGame === 'view-certificate' 
+              ? 'grammar-galaxy' 
+              : (selectedGame.replace('view-certificate-', '') as 'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion');
+            
+            const gamePrefixMap = {
+              'grammar-galaxy': 'EV-GG-EASY',
+              'modal-mind': 'EV-MM-MED1',
+              'what-yes-or-no': 'EV-WYN-MED2',
+              'modal-time-fusion': 'EV-MTF-ADV'
+            };
+            const prefix = gamePrefixMap[gameId] || 'EV-CERT';
+            const dynamicCertId = `${prefix}-${verificationHash}`;
+
+            return (
+              <Certificate
+                name={name}
+                grade={grade}
+                school={school}
+                certId={dynamicCertId}
+                gameId={gameId}
+                isPreview={!completedGames.includes(gameId)}
+                onReplay={() => handleGameSelectState(gameId)}
+                onBackToDashboard={() => handleGameSelectState(null)}
+              />
+            );
+          })()}
         </>
       )}
     </main>
