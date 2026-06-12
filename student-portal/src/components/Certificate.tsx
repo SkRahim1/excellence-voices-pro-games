@@ -20,6 +20,252 @@ export const Certificate: React.FC<CertificateProps> = ({
   onBackToDashboard,
   isPreview = false
 }) => {
+  const downloadCertificateAsImage = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1600;
+    canvas.height = 1100;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const logoImg = new Image();
+    logoImg.crossOrigin = 'anonymous';
+    logoImg.src = '/logo.jpg';
+
+    const drawAndDownload = () => {
+      // Draw background radial gradient
+      const grad = ctx.createRadialGradient(800, 550, 50, 800, 550, 900);
+      grad.addColorStop(0, '#111827');
+      grad.addColorStop(1, '#030712');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1600, 1100);
+
+      // Draw borders
+      const borderColor = isPreview ? '#6b7280' : '#10b981';
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 12;
+      ctx.strokeRect(30, 30, 1540, 1040);
+      ctx.lineWidth = 4;
+      ctx.strokeRect(48, 48, 1504, 1004);
+
+      // Draw Corner Ornaments (Lines)
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 6;
+      // Top Left
+      ctx.beginPath();
+      ctx.moveTo(70, 70); ctx.lineTo(130, 70);
+      ctx.moveTo(70, 70); ctx.lineTo(70, 130);
+      ctx.stroke();
+      // Top Right
+      ctx.beginPath();
+      ctx.moveTo(1530, 70); ctx.lineTo(1470, 70);
+      ctx.moveTo(1530, 70); ctx.lineTo(1530, 130);
+      ctx.stroke();
+      // Bottom Left
+      ctx.beginPath();
+      ctx.moveTo(70, 1030); ctx.lineTo(130, 1030);
+      ctx.moveTo(70, 1030); ctx.lineTo(70, 970);
+      ctx.stroke();
+      // Bottom Right
+      ctx.beginPath();
+      ctx.moveTo(1530, 1030); ctx.lineTo(1470, 1030);
+      ctx.moveTo(1530, 1030); ctx.lineTo(1530, 970);
+      ctx.stroke();
+
+      // Draw Watermark
+      ctx.save();
+      ctx.translate(800, 550);
+      ctx.rotate(-25 * Math.PI / 180);
+      ctx.font = '900 110px sans-serif';
+      ctx.fillStyle = isPreview ? '#ef4444' : '#10b981';
+      ctx.globalAlpha = isPreview ? 0.08 : 0.03;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('EXCELLENCE VOICES', 0, 0);
+      ctx.restore();
+      ctx.globalAlpha = 1.0;
+
+      // Draw logoImg in center if loaded
+      try {
+        if (logoImg.complete && logoImg.naturalWidth > 0) {
+          const logoHeight = 100;
+          const logoWidth = (logoImg.naturalWidth / logoImg.naturalHeight) * logoHeight;
+          
+          // Draw white background card for logo
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(800 - logoWidth/2 - 10, 90, logoWidth + 20, logoHeight + 20, 12);
+          } else {
+            ctx.rect(800 - logoWidth/2 - 10, 90, logoWidth + 20, logoHeight + 20);
+          }
+          ctx.fill();
+
+          ctx.drawImage(logoImg, 800 - logoWidth/2, 100, logoWidth, logoHeight);
+        }
+      } catch (e) {
+        console.warn('Failed to draw logo on canvas', e);
+      }
+
+      // Draw "EXCELLENCE VOICES" Title
+      const gradient = ctx.createLinearGradient(500, 0, 1100, 0);
+      if (isPreview) {
+        gradient.addColorStop(0, '#9ca3af');
+        gradient.addColorStop(0.5, '#d1d5db');
+        gradient.addColorStop(1, '#4b5563');
+      } else {
+        gradient.addColorStop(0, '#10b981');
+        gradient.addColorStop(0.5, '#34d399');
+        gradient.addColorStop(1, '#059669');
+      }
+      ctx.fillStyle = gradient;
+      ctx.textAlign = 'center';
+      ctx.font = '800 52px "Playfair Display", serif';
+      ctx.fillText('EXCELLENCE VOICES', 800, 270);
+
+      // Certificate of Achievement
+      ctx.fillStyle = '#94a3b8'; // text-muted
+      ctx.font = 'bold 24px sans-serif';
+      try {
+        (ctx as any).letterSpacing = '6px';
+      } catch (e) {}
+      ctx.fillText('CERTIFICATE OF ACHIEVEMENT', 800, 320);
+      try {
+        (ctx as any).letterSpacing = '0px';
+      } catch (e) {}
+
+      // This is proudly presented to
+      ctx.font = 'italic 28px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('This is proudly presented to', 800, 390);
+
+      // Student Name
+      ctx.font = 'bold 64px "Playfair Display", Georgia, serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(name || 'Karan', 800, 480);
+
+      // Line under name
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(500, 510);
+      ctx.lineTo(1100, 510);
+      ctx.stroke();
+
+      // Student of ... Grade ...
+      ctx.font = '28px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      const schoolText = getSchoolName(school) || 'Delhi Public School';
+      const gradeText = grade || 'Grade 7';
+      ctx.fillText(`Student of ${schoolText}, ${gradeText}`, 800, 560);
+
+      // for successfully completing ...
+      ctx.font = '28px sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText('for successfully completing the course curriculum and mastering the', 800, 630);
+
+      // Time Expression Master...
+      ctx.font = 'bold 36px sans-serif';
+      ctx.fillStyle = '#06b6d4'; // accent-cyan
+      ctx.fillText('TIME EXPRESSION MASTER: FOUNDATIONAL LEVEL (EASY)', 800, 690);
+
+      // Course details
+      ctx.font = '22px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('Demonstrating outstanding skills in spoken sentence formation using key temporal and conditional', 800, 755);
+      ctx.fillText('structures, covering Everyday routines, Completed past actions, Future plans, Timelines, and imaginary outcomes.', 800, 785);
+
+      // Footer divider line
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(150, 850);
+      ctx.lineTo(1450, 850);
+      ctx.stroke();
+
+      // --- Left Footer: Date & ID ---
+      ctx.textAlign = 'left';
+      ctx.font = '22px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      ctx.fillText(`Date: ${dateStr}`, 150, 910);
+      ctx.fillText(`ID: ${certId}`, 150, 950);
+
+      // --- Center Footer: Medal ---
+      ctx.textAlign = 'center';
+      ctx.font = '60px sans-serif';
+      ctx.fillText('🏅', 800, 930);
+
+      // --- Right Footer: Signature ---
+      ctx.textAlign = 'right';
+      ctx.font = 'italic 44px "Great Vibes", cursive';
+      ctx.fillStyle = isPreview ? '#94a3b8' : '#34d399';
+      ctx.fillText('Excellence Voices', 1450, 910);
+      
+      // Signature line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(1200, 930);
+      ctx.lineTo(1450, 930);
+      ctx.stroke();
+
+      ctx.font = '18px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('AUTHORIZED SIGNATORY', 1450, 960);
+
+      // Preview Banner watermark
+      if (isPreview) {
+        ctx.save();
+        ctx.translate(800, 550);
+        ctx.rotate(-45 * Math.PI / 180);
+        ctx.font = 'bold 120px sans-serif';
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('PREVIEW ONLY', 0, 0);
+        ctx.restore();
+      }
+
+      // Download the image
+      try {
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `excellence_voices_certificate_${name.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch (e) {
+        console.error('Failed to export canvas to image', e);
+        window.print();
+      }
+    };
+
+    logoImg.onload = () => {
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          drawAndDownload();
+        }).catch(() => {
+          drawAndDownload();
+        });
+      } else {
+        setTimeout(drawAndDownload, 500);
+      }
+    };
+
+    logoImg.onerror = () => {
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          drawAndDownload();
+        }).catch(() => {
+          drawAndDownload();
+        });
+      } else {
+        setTimeout(drawAndDownload, 500);
+      }
+    };
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', alignItems: 'center', width: '100%' }}>
       
@@ -333,6 +579,24 @@ export const Certificate: React.FC<CertificateProps> = ({
         ) : (
           <>
             <button 
+              onClick={downloadCertificateAsImage}
+              style={{
+                background: 'var(--accent-gradient)',
+                border: 'none',
+                color: 'white',
+                padding: '0.85rem 1.5rem',
+                fontWeight: 700,
+                borderRadius: 'var(--radius-btn)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 4px 12px var(--accent-glow)'
+              }}
+            >
+              📥 Download Certificate (Image)
+            </button>
+            <button 
               onClick={() => window.print()}
               style={{
                 background: 'rgba(255,255,255,0.06)',
@@ -347,7 +611,7 @@ export const Certificate: React.FC<CertificateProps> = ({
                 gap: '0.5rem'
               }}
             >
-              📥 Download Certificate (PDF)
+              🖨️ Print PDF
             </button>
             <button 
               onClick={onReplay}
