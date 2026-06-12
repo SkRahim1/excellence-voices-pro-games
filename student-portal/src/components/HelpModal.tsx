@@ -13,8 +13,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ onClose }) => {
   const faqs = [
     {
       icon: <BookOpen style={{ color: 'var(--accent-cyan)' }} />,
-      q: "How do I play the games?",
-      a: "Excellence Voices Pro has 3 games: Time Expression Master (arrange scattered words into sentences based on tenses), Word Rush (speed vocabulary agreement questions), and Phonics Matcher (listen and click the correct spelling)."
+      q: "What games are available?",
+      a: "We feature 9 interactive learning games: Time Expression Master (tenses), Word Rush (speed S-V agreement), Phonics Matcher (spelling-sound), Phrasal Verb Explorer (daily idioms), Modal Mind (auxiliaries), What Yes or No? (conversational polar questions), Modal Time Fusion (advanced timeline matching), English Chess (grammar chess matches), and Escape Room English (riddles & safe unlocking)."
     },
     {
       icon: <Clock style={{ color: 'var(--accent-purple)' }} />,
@@ -35,6 +35,11 @@ export const HelpModal: React.FC<HelpModalProps> = ({ onClose }) => {
       icon: <Award style={{ color: '#10b981' }} />,
       q: "How do I get my official certificate?",
       a: "Complete all 11 levels of Time Expression Master. Once cleared, you will unlock a custom verified Certificate showing your details which you can print or download directly as a PDF."
+    },
+    {
+      icon: <HelpCircle style={{ color: 'var(--accent-pink)' }} />,
+      q: "Can I resume games or exit them on mobile?",
+      a: "Yes! Your levels and high scores are saved in the cloud. You can resume any game from the dashboard. Pressing the browser or mobile back button will exit the current game and return you to the dashboard safely."
     }
   ];
 
