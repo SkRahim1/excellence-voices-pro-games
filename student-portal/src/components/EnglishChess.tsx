@@ -9,8 +9,8 @@ interface EnglishChessProps {
 }
 
 const PIECE_SYMBOLS: Record<string, string> = {
-  wp: '♙', wr: '♜', wn: '♞', wb: '♝', wq: '♛', wk: '♚',
-  bp: '♟', br: '♜', bn: '♞', bb: '♝', bq: '♛', bk: '♚'
+  wp: '♙\uFE0E', wr: '♜\uFE0E', wn: '♞\uFE0E', wb: '♝\uFE0E', wq: '♛\uFE0E', wk: '♚\uFE0E',
+  bp: '♟\uFE0E', br: '♜\uFE0E', bn: '♞\uFE0E', bb: '♝\uFE0E', bq: '♛\uFE0E', bk: '♚\uFE0E'
 };
 
 export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard }) => {
@@ -90,6 +90,14 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
     if (numericGrade <= 8) return 'intermediate';
     return 'advanced';
   };
+
+  const getCardStyle = (borderStyle: string, bgStyle?: string): React.CSSProperties => ({
+    padding: 'clamp(0.9rem, 4vw, 1.25rem)',
+    cursor: 'pointer',
+    border: borderStyle,
+    background: bgStyle || 'transparent',
+    WebkitTapHighlightColor: 'transparent'
+  });
 
   // Filter and pick a challenge matching mode and level
   const loadNewChallenge = () => {
@@ -502,15 +510,15 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
   // ----------------------------------------------------
   if (gameMode === 'select') {
     return (
-      <div className="main-container" style={{ maxWidth: '800px', margin: '0 auto', padding: '1.5rem' }}>
+      <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', padding: '1rem clamp(0.5rem, 3vw, 1.5rem)' }}>
         
         {/* Title */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>♟️</div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', background: 'linear-gradient(to right, var(--accent-cyan), var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.25rem' }}>♟️</div>
+          <h1 style={{ fontSize: 'clamp(1.4rem, 6vw, 1.9rem)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', background: 'linear-gradient(to right, var(--accent-cyan), var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             English Chess Hub
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(0.8rem, 3vw, 0.95rem)', marginTop: '0.25rem' }}>
             Learn chess, play standard practice matches, or solve grammar quizzes to unlock your moves!
           </p>
         </div>
@@ -525,7 +533,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('tutorial'); setTutorialSlide(0); playSoundTone(440, 0.05, 'sine'); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px dashed rgba(6, 182, 212, 0.4)', background: 'rgba(6, 182, 212, 0.02)' }}
+            style={getCardStyle('1px dashed rgba(6, 182, 212, 0.4)', 'rgba(6, 182, 212, 0.02)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📖</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>How Chess Works</h4>
@@ -538,7 +546,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('classic'); handleRestart(); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={getCardStyle('1px solid rgba(255,255,255,0.08)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⚙️</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>Classic Chess</h4>
@@ -551,7 +559,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('vocab'); handleRestart(); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={getCardStyle('1px solid rgba(255,255,255,0.08)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>✍️</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>Vocabulary Chess</h4>
@@ -564,7 +572,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('grammar'); handleRestart(); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={getCardStyle('1px solid rgba(255,255,255,0.08)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📝</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>Grammar Chess</h4>
@@ -577,7 +585,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('scramble'); handleRestart(); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={getCardStyle('1px solid rgba(255,255,255,0.08)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🧩</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>Sentence Builder</h4>
@@ -590,7 +598,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('story'); handleRestart(); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={getCardStyle('1px solid rgba(255,255,255,0.08)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📚</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>Story Chess</h4>
@@ -603,7 +611,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div 
             onClick={() => { setGameMode('quick'); handleRestart(); }}
             className="glass-card hover-lift" 
-            style={{ padding: '1.25rem', cursor: 'pointer', border: '1px solid rgba(244, 63, 94, 0.3)', background: 'rgba(244, 63, 94, 0.02)' }}
+            style={getCardStyle('1px solid rgba(244, 63, 94, 0.3)', 'rgba(244, 63, 94, 0.02)')}
           >
             <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⚡</div>
             <h4 style={{ margin: 0, fontWeight: 800, fontSize: '0.98rem' }}>Quick Chess</h4>
@@ -640,14 +648,14 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
   if (gameMode === 'tutorial') {
     const slide = tutorialSlides[tutorialSlide];
     return (
-      <div className="main-container" style={{ maxWidth: '560px', margin: '0 auto', padding: '1.5rem' }}>
+      <div style={{ width: '100%', maxWidth: '560px', margin: '0 auto', padding: '1rem clamp(0.5rem, 3vw, 1.5rem)' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
           <BookOpen style={{ color: 'var(--accent-cyan)', width: '24px', height: '24px' }} />
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, margin: 0 }}>Chess Tutorial</h2>
+          <h2 style={{ fontSize: 'clamp(1.1rem, 5vw, 1.3rem)', fontWeight: 800, margin: 0 }}>Chess Tutorial</h2>
         </div>
 
-        <div className="glass-card animate-pulse-slow" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', minHeight: '300px' }}>
+        <div className="glass-card animate-pulse-slow" style={{ padding: 'clamp(1rem, 5vw, 2rem)', display: 'flex', flexDirection: 'column', gap: '1.25rem', minHeight: '300px' }}>
           
           <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>
@@ -750,37 +758,38 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
   // RENDER SCREEN 3: ACTIVE GAMEPLAY MATCH
   // ----------------------------------------------------
   return (
-    <div className="main-container" style={{ maxWidth: '800px', margin: '0 auto', padding: '1rem' }}>
+    <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', padding: '0.5rem clamp(0.5rem, 2vw, 1rem)' }}>
       
       {/* Header Panel */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <button 
           onClick={handleExitToModes}
           style={{
             background: 'rgba(255,255,255,0.06)',
             border: 'var(--card-border)',
             color: 'var(--text-main)',
-            padding: '0.6rem 1.2rem',
+            padding: '0.5rem 1rem',
             borderRadius: 'var(--radius-btn)',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
             fontWeight: 700,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent'
           }}
         >
           <ArrowLeft style={{ width: '16px', height: '16px' }} />
           Change Mode
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div className="glass-card" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: 700 }}>
-            <Award style={{ color: '#eab308', width: '18px', height: '18px' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="glass-card" style={{ padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '50px', fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)', fontWeight: 700 }}>
+            <Award style={{ color: '#eab308', width: '16px', height: '16px' }} />
             <span>Score: {score}</span>
           </div>
           {streak >= 3 && (
-            <div className="glass-card animate-pulse-slow" style={{ padding: '0.5rem 1.1rem', background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.4)', color: '#f97316', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: 800 }}>
-              <Zap style={{ fill: '#f97316', width: '18px', height: '18px' }} />
+            <div className="glass-card animate-pulse-slow" style={{ padding: '0.4rem 0.9rem', background: 'rgba(249, 115, 22, 0.15)', border: '1px solid rgba(249, 115, 22, 0.4)', color: '#f97316', display: 'flex', alignItems: 'center', gap: '0.4rem', borderRadius: '50px', fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)', fontWeight: 800 }}>
+              <Zap style={{ fill: '#f97316', width: '16px', height: '16px' }} />
               <span>Streak: {streak} 🔥</span>
             </div>
           )}
@@ -790,8 +799,8 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
       {/* Main Board and Moves layout */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '2rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: 'clamp(1rem, 4vw, 2rem)',
         alignItems: 'start'
       }}>
         
@@ -867,10 +876,11 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '2rem',
+                          fontSize: 'clamp(1.15rem, 7vw, 1.85rem)',
                           position: 'relative',
                           transition: 'all 0.15s ease',
-                          padding: 0
+                          padding: 0,
+                          WebkitTapHighlightColor: 'transparent'
                         }}
                       >
                         {pieceRepresentation && (
@@ -897,12 +907,12 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
                         )}
 
                         {cIdx === 0 && (
-                          <span style={{ position: 'absolute', top: '2px', left: '4px', fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', fontWeight: 800 }}>
+                          <span style={{ position: 'absolute', top: '2px', left: '4px', fontSize: 'clamp(0.4rem, 1.8vw, 0.52rem)', color: 'rgba(255,255,255,0.25)', fontWeight: 800 }}>
                             {rankNum}
                           </span>
                         )}
                         {rIdx === 7 && (
-                          <span style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: '0.55rem', color: 'rgba(255,255,255,0.25)', fontWeight: 800 }}>
+                          <span style={{ position: 'absolute', bottom: '2px', right: '4px', fontSize: 'clamp(0.4rem, 1.8vw, 0.52rem)', color: 'rgba(255,255,255,0.25)', fontWeight: 800 }}>
                             {fileLetter}
                           </span>
                         )}
@@ -1022,11 +1032,11 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
           <div className="glass-card" style={{
             maxWidth: '520px',
             width: '100%',
-            padding: '2rem',
+            padding: 'clamp(1rem, 5vw, 2rem)',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.25rem',
+            gap: 'clamp(0.8rem, 4vw, 1.25rem)',
             animation: 'scaleIn 0.3s ease'
           }}>
             
@@ -1072,12 +1082,12 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
             <div style={{
               background: 'rgba(255,255,255,0.02)',
               border: 'var(--card-border)',
-              padding: '1.25rem',
+              padding: 'clamp(0.8rem, 3.5vw, 1.25rem)',
               borderRadius: '12px',
               textAlign: 'center',
               fontWeight: 800,
-              fontSize: '1.1rem',
-              lineHeight: '1.5',
+              fontSize: 'clamp(0.92rem, 4.2vw, 1.12rem)',
+              lineHeight: '1.45',
               color: 'var(--text-main)'
             }}>
               {gameMode === 'story' ? 'Choose the next logical sentence to continue the story:' : (currentChallenge as ChessChallenge).question}
@@ -1092,17 +1102,18 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
                 
                 let optionStyle: React.CSSProperties = {
                   width: '100%',
-                  padding: '0.85rem 1.25rem',
+                  padding: 'clamp(0.65rem, 3.5vw, 0.95rem) clamp(0.85rem, 4.5vw, 1.35rem)',
                   borderRadius: 'var(--radius-btn)',
                   border: 'var(--card-border)',
                   background: 'rgba(255,255,255,0.03)',
                   color: 'var(--text-main)',
                   fontWeight: 700,
-                  fontSize: '0.95rem',
+                  fontSize: 'clamp(0.82rem, 3.8vw, 0.98rem)',
                   textAlign: 'left',
                   cursor: (selectedOption !== null || isHintDisabled) ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
-                  opacity: isHintDisabled ? 0.3 : 1
+                  opacity: isHintDisabled ? 0.3 : 1,
+                  WebkitTapHighlightColor: 'transparent'
                 };
 
                 if (selectedOption !== null) {
@@ -1165,25 +1176,26 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
 
             {/* Hint control buttons (Disabled in Quick mode to encourage speed) */}
             {gameMode !== 'quick' && (
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <button
                   type="button"
                   disabled={selectedOption !== null || hintUsedCount >= 3 || disabledOptions.length > 0}
                   onClick={triggerFiftyFifty}
                   style={{
                     flex: 1,
-                    padding: '0.6rem',
-                    fontSize: '0.78rem',
+                    padding: '0.6rem 0.25rem',
+                    fontSize: 'clamp(0.7rem, 3.2vw, 0.78rem)',
                     fontWeight: 800,
                     borderRadius: 'var(--radius-btn)',
                     background: 'rgba(255,255,255,0.04)',
                     border: 'var(--card-border)',
                     color: 'var(--text-main)',
                     cursor: (selectedOption !== null || hintUsedCount >= 3 || disabledOptions.length > 0) ? 'not-allowed' : 'pointer',
-                    opacity: (selectedOption !== null || hintUsedCount >= 3 || disabledOptions.length > 0) ? 0.5 : 1
+                    opacity: (selectedOption !== null || hintUsedCount >= 3 || disabledOptions.length > 0) ? 0.5 : 1,
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
-                  ✂️ 50/50 ({3 - hintUsedCount} hints)
+                  ✂️ 50/50 ({3 - hintUsedCount})
                 </button>
                 <button
                   type="button"
@@ -1191,15 +1203,16 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
                   onClick={triggerShowClue}
                   style={{
                     flex: 1,
-                    padding: '0.6rem',
-                    fontSize: '0.78rem',
+                    padding: '0.6rem 0.25rem',
+                    fontSize: 'clamp(0.7rem, 3.2vw, 0.78rem)',
                     fontWeight: 800,
                     borderRadius: 'var(--radius-btn)',
                     background: 'rgba(255,255,255,0.04)',
                     border: 'var(--card-border)',
                     color: 'var(--text-main)',
                     cursor: (selectedOption !== null || hintUsedCount >= 3 || showClue) ? 'not-allowed' : 'pointer',
-                    opacity: (selectedOption !== null || hintUsedCount >= 3 || showClue) ? 0.5 : 1
+                    opacity: (selectedOption !== null || hintUsedCount >= 3 || showClue) ? 0.5 : 1,
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   💡 Show Clue
@@ -1208,7 +1221,7 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
             )}
 
             {/* Bottom controls */}
-            <div style={{ display: 'flex', gap: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -1217,14 +1230,16 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
                 }}
                 style={{
                   flex: 1,
-                  padding: '0.75rem',
+                  minWidth: '120px',
+                  padding: '0.65rem 0.5rem',
                   fontWeight: 700,
-                  fontSize: '0.9rem',
+                  fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)',
                   background: 'transparent',
                   border: '1px solid rgba(255,255,255,0.1)',
                   color: 'var(--text-muted)',
                   borderRadius: 'var(--radius-btn)',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent'
                 }}
               >
                 Cancel Move
@@ -1236,15 +1251,17 @@ export const EnglishChess: React.FC<EnglishChessProps> = ({ onBackToDashboard })
                   onClick={loadNewChallenge}
                   style={{
                     flex: 1,
-                    padding: '0.75rem',
+                    minWidth: '120px',
+                    padding: '0.65rem 0.5rem',
                     fontWeight: 700,
-                    fontSize: '0.9rem',
+                    fontSize: 'clamp(0.8rem, 3.5vw, 0.9rem)',
                     background: 'var(--accent-gradient)',
                     border: 'none',
                     color: 'white',
                     borderRadius: 'var(--radius-btn)',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 10px var(--accent-glow)'
+                    boxShadow: '0 4px 10px var(--accent-glow)',
+                    WebkitTapHighlightColor: 'transparent'
                   }}
                 >
                   Try Another Question
