@@ -364,6 +364,33 @@ export const OnboardingForm: React.FC = () => {
           </form>
         )}
       </div>
+
+      {/* Renvix Technologies Branding Footer */}
+      <footer style={{ 
+        textAlign: 'center', 
+        padding: '1rem 0', 
+        fontSize: '0.82rem',
+        color: 'var(--text-muted)'
+      }}>
+        <span>A Product of </span>
+        <a 
+          href="https://renvixteach.in" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ 
+            color: 'var(--accent-cyan)', 
+            fontWeight: 800, 
+            textDecoration: 'none',
+            borderBottom: '1px dashed var(--accent-cyan)',
+            paddingBottom: '2px',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-purple)'}
+          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--accent-cyan)'}
+        >
+          Renvix Technologies
+        </a>
+      </footer>
     </div>
   );
 };
