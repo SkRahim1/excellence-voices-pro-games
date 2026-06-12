@@ -8,6 +8,7 @@ import { PhrasalVerbExplorer } from './components/PhrasalVerbExplorer';
 import { ModalMind } from './components/ModalMind';
 import { WhatYesOrNo } from './components/WhatYesOrNo';
 import { ModalTimeFusion } from './components/ModalTimeFusion';
+import { EnglishChess } from './components/EnglishChess';
 import { OnboardingForm } from './components/OnboardingForm';
 import { Certificate } from './components/Certificate';
 import { LockoutScreen } from './components/LockoutScreen';
@@ -138,6 +139,10 @@ function App() {
 
           {selectedGame === 'modal-time-fusion' && (
             <ModalTimeFusion onBackToDashboard={() => setSelectedGame(null)} />
+          )}
+
+          {selectedGame === 'english-chess' && (
+            <EnglishChess onBackToDashboard={() => setSelectedGame(null)} />
           )}
 
           {selectedGame === 'view-certificate' && (

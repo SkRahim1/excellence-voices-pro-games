@@ -28,7 +28,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     wordRushLevelIndex,
     phonicsLevelIndex,
     modalTimeFusionLevelIndex,
-    dailyActiveSeconds
+    dailyActiveSeconds,
+    chessHighScore
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -180,6 +181,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       difficulty: 'Difficult',
       xpReward: 120,
       iconColor: 'from-fuchsia-600 to-pink-600',
+    },
+    {
+      id: 'english-chess',
+      title: 'English Chess ♟️',
+      desc: 'Play standard chess against a computer bot! Unlock your moves by solving English vocabulary, grammar, and sentence building challenges.',
+      duration: 'Adaptive',
+      difficulty: 'Grades 1-12',
+      xpReward: 100,
+      iconColor: 'from-blue-600 to-indigo-800',
     },
   ];
 
@@ -473,7 +483,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                     fontSize: '1.5rem',
                     color: 'white'
                   }}>
-                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : '🔊'}
+                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : '🔊'}
                   </div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -598,6 +608,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                         </div>
                         <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
                           <div style={{ width: `${(modalTimeFusionLevelIndex / 11) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                        </div>
+                      </div>
+                    )}
+
+                    {game.id === 'english-chess' && chessHighScore > 0 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 800 }}>
+                          🏆 High Score: {chessHighScore} Pts
                         </div>
                       </div>
                     )}
