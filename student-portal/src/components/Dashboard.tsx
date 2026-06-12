@@ -29,7 +29,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     phonicsLevelIndex,
     modalTimeFusionLevelIndex,
     dailyActiveSeconds,
-    chessHighScore
+    chessHighScore,
+    escapeRoomHighScore
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -190,6 +191,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       difficulty: 'Beginner / Intermediate / Advanced',
       xpReward: 100,
       iconColor: 'from-blue-600 to-indigo-800',
+    },
+    {
+      id: 'escape-room',
+      title: 'Escape Room English 🔐',
+      desc: 'Escape a mysterious learning castle! Search room items to solve vocabulary, grammar, reading riddles, and keypad lock code puzzles.',
+      duration: '60 Mins',
+      difficulty: 'Beginner / Intermediate / Advanced',
+      xpReward: 120,
+      iconColor: 'from-fuchsia-500 to-indigo-600',
     },
   ];
 
@@ -483,7 +493,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                     fontSize: '1.5rem',
                     color: 'white'
                   }}>
-                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : '🔊'}
+                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : '🔊'}
                   </div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -616,6 +626,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                       <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 800 }}>
                           🏆 High Score: {chessHighScore} Pts
+                        </div>
+                      </div>
+                    )}
+
+                    {game.id === 'escape-room' && escapeRoomHighScore > 0 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 800 }}>
+                          🏆 High Score: {escapeRoomHighScore} Pts
                         </div>
                       </div>
                     )}

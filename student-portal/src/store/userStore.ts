@@ -35,6 +35,7 @@ interface UserState {
   lastActiveDate: string;
   lastStreakUpdatedDate: string;
   chessHighScore: number;
+  escapeRoomHighScore: number;
   
   addXp: (amount: number) => void;
   addCoins: (amount: number) => void;
@@ -51,6 +52,7 @@ interface UserState {
   setPhonicsLevelIndex: (levelIndex: number) => void;
   setModalTimeFusionLevelIndex: (levelIndex: number) => void;
   setChessHighScore: (score: number) => void;
+  setEscapeRoomHighScore: (score: number) => void;
   registerStudent: (details: { name: string; grade: string; school: string; mobileNumber: string }) => void;
   loginStudent: (mobileNumber: string) => Promise<boolean>;
   tickActiveTime: (seconds: number) => void;
@@ -98,6 +100,7 @@ export const useUserStore = create<UserState>()(
         lastActiveDate: '',
         lastStreakUpdatedDate: '',
         chessHighScore: 0,
+        escapeRoomHighScore: 0,
 
         addXp: (amount) =>
           set((state) => {
@@ -197,6 +200,14 @@ export const useUserStore = create<UserState>()(
             }
             return {};
           }),
+        setEscapeRoomHighScore: (score) =>
+           set((state) => {
+             if (score > (state.escapeRoomHighScore || 0)) {
+               syncStoreToCloud({ escapeRoomHighScore: score });
+               return { escapeRoomHighScore: score };
+             }
+             return {};
+           }),
         registerStudent: (details) => {
           const studentData = {
             name: details.name,
@@ -220,6 +231,7 @@ export const useUserStore = create<UserState>()(
             lastActiveDate: '',
             lastStreakUpdatedDate: '',
             chessHighScore: 0,
+            escapeRoomHighScore: 0,
           };
 
           set(() => studentData);
@@ -262,6 +274,7 @@ export const useUserStore = create<UserState>()(
                 lastActiveDate: data.lastActiveDate || '',
                 lastStreakUpdatedDate: data.lastStreakUpdatedDate || '',
                 chessHighScore: data.chessHighScore ?? 0,
+                escapeRoomHighScore: data.escapeRoomHighScore ?? 0,
               }));
               return true;
             }
@@ -344,6 +357,7 @@ export const useUserStore = create<UserState>()(
               lastActiveDate: '',
               lastStreakUpdatedDate: '',
               chessHighScore: 0,
+              escapeRoomHighScore: 0,
             }).catch((err) => console.error('Cloud reset failed:', err));
           }
 
@@ -370,6 +384,7 @@ export const useUserStore = create<UserState>()(
             dailyActiveSeconds: 0,
             lastActiveDate: '',
             chessHighScore: 0,
+            escapeRoomHighScore: 0,
           }));
         },
         logout: () => {
@@ -395,6 +410,7 @@ export const useUserStore = create<UserState>()(
             lastActiveDate: '',
             lastStreakUpdatedDate: '',
             chessHighScore: 0,
+            escapeRoomHighScore: 0,
           }));
         },
       };

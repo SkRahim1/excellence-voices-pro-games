@@ -9,6 +9,7 @@ import { ModalMind } from './components/ModalMind';
 import { WhatYesOrNo } from './components/WhatYesOrNo';
 import { ModalTimeFusion } from './components/ModalTimeFusion';
 import { EnglishChess } from './components/EnglishChess';
+import { EscapeRoomEnglish } from './components/EscapeRoomEnglish';
 import { OnboardingForm } from './components/OnboardingForm';
 import { Certificate } from './components/Certificate';
 import { LockoutScreen } from './components/LockoutScreen';
@@ -143,6 +144,10 @@ function App() {
 
           {selectedGame === 'english-chess' && (
             <EnglishChess onBackToDashboard={() => setSelectedGame(null)} />
+          )}
+
+          {selectedGame === 'escape-room' && (
+            <EscapeRoomEnglish onBackToDashboard={() => setSelectedGame(null)} />
           )}
 
           {selectedGame === 'view-certificate' && (
