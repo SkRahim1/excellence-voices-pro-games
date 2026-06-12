@@ -10,6 +10,7 @@ import { WhatYesOrNo } from './components/WhatYesOrNo';
 import { ModalTimeFusion } from './components/ModalTimeFusion';
 import { EnglishChess } from './components/EnglishChess';
 import { EscapeRoomEnglish } from './components/EscapeRoomEnglish';
+import { RiyanStoryGame } from './components/RiyanStoryGame';
 import { OnboardingForm } from './components/OnboardingForm';
 import { Certificate } from './components/Certificate';
 import { LockoutScreen } from './components/LockoutScreen';
@@ -170,6 +171,10 @@ function App() {
 
           {selectedGame === 'escape-room' && (
             <EscapeRoomEnglish onBackToDashboard={() => handleGameSelectState(null)} />
+          )}
+
+          {selectedGame === 'riyan-story' && (
+            <RiyanStoryGame onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'view-certificate' && (

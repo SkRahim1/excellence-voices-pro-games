@@ -30,7 +30,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     modalTimeFusionLevelIndex,
     dailyActiveSeconds,
     chessHighScore,
-    escapeRoomHighScore
+    escapeRoomHighScore,
+    riyanStoryLevelIndex
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -200,6 +201,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       difficulty: 'Beginner / Intermediate / Advanced',
       xpReward: 120,
       iconColor: 'from-fuchsia-500 to-indigo-600',
+    },
+    {
+      id: 'riyan-story',
+      title: 'How Riyan Learnt English 📚',
+      desc: 'Join Riyan on an interactive animated quest to master English fluency! Complete 5 chapters of stories, animations, and grammar puzzles.',
+      duration: '50 Mins',
+      difficulty: 'Beginner / Intermediate',
+      xpReward: 120,
+      iconColor: 'from-rose-500 to-pink-600',
     },
   ];
 
@@ -637,6 +647,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                         </div>
                       </div>
                     )}
+
+                    {game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 700 }}>
+                          <span>Story Progress</span>
+                          <span>Level {riyanStoryLevelIndex + 1} of 5 ({Math.round((riyanStoryLevelIndex / 5) * 100)}%)</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(riyanStoryLevelIndex / 5) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -646,7 +668,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                   (game.id === 'phrasal-verbs' && phrasalVerbLevelIndex > 0) ||
                   (game.id === 'modal-mind' && modalLevelIndex > 0) ||
                   (game.id === 'what-yes-or-no' && whatYesOrNoLevelIndex > 0) ||
-                  (game.id === 'modal-time-fusion' && modalTimeFusionLevelIndex > 0)) && !isCompleted ? (
+                  (game.id === 'modal-time-fusion' && modalTimeFusionLevelIndex > 0) ||
+                  (game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5)) && !isCompleted ? (
                   <button className="game-card-resume-btn">
                     <Play style={{ width: '14px', height: '14px', fill: 'currentColor' }} />
                     Resume
