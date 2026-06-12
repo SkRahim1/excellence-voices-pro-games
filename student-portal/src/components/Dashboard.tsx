@@ -187,7 +187,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       title: 'English Chess ♟️',
       desc: 'Play standard chess against a computer bot! Unlock your moves by solving English vocabulary, grammar, and sentence building challenges.',
       duration: 'Adaptive',
-      difficulty: 'Grades 1-12',
+      difficulty: 'Beginner / Intermediate / Advanced',
       xpReward: 100,
       iconColor: 'from-blue-600 to-indigo-800',
     },
