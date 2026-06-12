@@ -24,6 +24,28 @@ function App() {
   const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, lastActiveDate, tickActiveTime, checkDailyReset } = useUserStore();
   const { cancel } = useSpeech();
 
+  // Synchronize selectedGame state with browser history popstate to handle back button
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const stateGame = event.state && event.state.game;
+      setSelectedGame(stateGame || null);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleGameSelectState = (game: string | null) => {
+    if (game === null) {
+      if (selectedGame !== null) {
+        window.history.back();
+      }
+    } else {
+      window.history.pushState({ game }, '', '');
+      setSelectedGame(game);
+    }
+  };
+
   // Sync theme class with HTML element
   useEffect(() => {
     const root = document.documentElement;
@@ -111,43 +133,43 @@ function App() {
       ) : (
         <>
           {!selectedGame && (
-            <Dashboard onSelectGame={setSelectedGame} onOpenSettings={() => setShowSettings(true)} />
+            <Dashboard onSelectGame={handleGameSelectState} onOpenSettings={() => setShowSettings(true)} />
           )}
 
           {selectedGame === 'grammar-galaxy' && (
-            <GrammarGalaxy onBackToDashboard={() => setSelectedGame(null)} />
+            <GrammarGalaxy onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'word-rush' && (
-            <WordRush onBackToDashboard={() => setSelectedGame(null)} />
+            <WordRush onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'phonics-matcher' && (
-            <PhonicsMatcher onBackToDashboard={() => setSelectedGame(null)} />
+            <PhonicsMatcher onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'phrasal-verbs' && (
-            <PhrasalVerbExplorer onBackToDashboard={() => setSelectedGame(null)} />
+            <PhrasalVerbExplorer onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'modal-mind' && (
-            <ModalMind onBackToDashboard={() => setSelectedGame(null)} />
+            <ModalMind onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'what-yes-or-no' && (
-            <WhatYesOrNo onBackToDashboard={() => setSelectedGame(null)} />
+            <WhatYesOrNo onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'modal-time-fusion' && (
-            <ModalTimeFusion onBackToDashboard={() => setSelectedGame(null)} />
+            <ModalTimeFusion onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'english-chess' && (
-            <EnglishChess onBackToDashboard={() => setSelectedGame(null)} />
+            <EnglishChess onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'escape-room' && (
-            <EscapeRoomEnglish onBackToDashboard={() => setSelectedGame(null)} />
+            <EscapeRoomEnglish onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {selectedGame === 'view-certificate' && (
@@ -157,8 +179,8 @@ function App() {
               school={school}
               certId={certId}
               isPreview={!completedGames.includes('grammar-galaxy')}
-              onReplay={() => setSelectedGame('grammar-galaxy')}
-              onBackToDashboard={() => setSelectedGame(null)}
+              onReplay={() => handleGameSelectState('grammar-galaxy')}
+              onBackToDashboard={() => handleGameSelectState(null)}
             />
           )}
         </>
