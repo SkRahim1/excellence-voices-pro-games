@@ -38,6 +38,7 @@ export const AdminPortal: React.FC = () => {
   const [students, setStudents] = useState<StudentData[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'schools' | 'students'>('overview');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // Search/Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -215,7 +216,7 @@ export const AdminPortal: React.FC = () => {
   const averageXP = totalStudents > 0 ? Math.round(totalXP / totalStudents) : 0;
   
   // Calculate active schools
-  const activeSchoolsList = Array.from(new Set(students.map(s => s.school)));
+  const activeSchoolsList = Array.from(new Set(students.map(s => s.school))) as string[];
   const totalActiveSchools = activeSchoolsList.length;
 
   // Schoolwise breakdown mapping
@@ -766,48 +767,198 @@ export const AdminPortal: React.FC = () => {
                 </button>
               </div>
 
-              {/* Student List Table */}
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8', fontWeight: 700 }}>
-                      <th style={{ padding: '12px' }}>Rank</th>
-                      <th style={{ padding: '12px' }}>Name</th>
-                      <th style={{ padding: '12px' }}>Mobile Number</th>
-                      <th style={{ padding: '12px' }}>School Name</th>
-                      <th style={{ padding: '12px' }}>Grade</th>
-                      <th style={{ padding: '12px' }}>XP Level</th>
-                      <th style={{ padding: '12px' }}>Coins</th>
-                      <th style={{ padding: '12px' }}>Streak</th>
-                      <th style={{ padding: '12px' }}>Daily Speaking Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStudents.map((s, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }}>
-                        <td style={{ padding: '12px', fontWeight: 700, color: '#94a3b8' }}>#{idx + 1}</td>
-                        <td style={{ padding: '12px', fontWeight: 700 }}>{s.name}</td>
-                        <td style={{ padding: '12px', color: '#94a3b8', fontFamily: 'monospace' }}>{s.mobileNumber}</td>
-                        <td style={{ padding: '12px', color: '#94a3b8' }}>{getSchoolName(s.school)}</td>
-                        <td style={{ padding: '12px' }}>{s.grade}</td>
-                        <td style={{ padding: '12px', color: '#06b6d4', fontWeight: 700 }}>{s.xp} XP</td>
-                        <td style={{ padding: '12px', color: '#f59e0b', fontWeight: 700 }}>{s.coins}</td>
-                        <td style={{ padding: '12px', color: '#f97316', fontWeight: 700 }}>{s.streak} Days</td>
-                        <td style={{ padding: '12px', color: '#10b981', fontWeight: 600 }}>
-                          {Math.floor((s.dailyActiveSeconds || 0) / 60)} Mins
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredStudents.length === 0 && (
-                      <tr>
-                        <td colSpan={9} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>
-                          No students matching filters found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              {/* View Mode Toggle and Info */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                flexWrap: 'wrap', 
+                gap: '1rem',
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+                paddingTop: '1.25rem'
+              }}>
+                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                  Showing <strong>{filteredStudents.length}</strong> of <strong>{students.length}</strong> students
+                </span>
+                
+                <div style={{ 
+                  display: 'flex', 
+                  background: 'rgba(255, 255, 255, 0.03)', 
+                  padding: '2px', 
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.06)'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('list')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      background: viewMode === 'list' ? 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)' : 'transparent',
+                      color: viewMode === 'list' ? '#fff' : '#94a3b8',
+                      transition: 'all 0.2s',
+                      outline: 'none'
+                    }}
+                  >
+                    📋 List View
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('grid')}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      background: viewMode === 'grid' ? 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)' : 'transparent',
+                      color: viewMode === 'grid' ? '#fff' : '#94a3b8',
+                      transition: 'all 0.2s',
+                      outline: 'none'
+                    }}
+                  >
+                    🎴 Grid View
+                  </button>
+                </div>
               </div>
+
+              {/* Student View Options */}
+              {viewMode === 'list' ? (
+                /* Student List Table */
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: '#94a3b8', fontWeight: 700 }}>
+                        <th style={{ padding: '12px' }}>Rank</th>
+                        <th style={{ padding: '12px' }}>Name</th>
+                        <th style={{ padding: '12px' }}>Mobile Number</th>
+                        <th style={{ padding: '12px' }}>School Name</th>
+                        <th style={{ padding: '12px' }}>Grade</th>
+                        <th style={{ padding: '12px' }}>XP Level</th>
+                        <th style={{ padding: '12px' }}>Coins</th>
+                        <th style={{ padding: '12px' }}>Streak</th>
+                        <th style={{ padding: '12px' }}>Daily Speaking Time</th>
+                        <th style={{ padding: '12px' }}>Completed Games</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStudents.map((s, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }}>
+                          <td style={{ padding: '12px', fontWeight: 700, color: '#94a3b8' }}>#{idx + 1}</td>
+                          <td style={{ padding: '12px', fontWeight: 700 }}>{s.name}</td>
+                          <td style={{ padding: '12px', color: '#94a3b8', fontFamily: 'monospace' }}>{s.mobileNumber}</td>
+                          <td style={{ padding: '12px', color: '#94a3b8' }}>{getSchoolName(s.school)}</td>
+                          <td style={{ padding: '12px' }}>{s.grade}</td>
+                          <td style={{ padding: '12px', color: '#06b6d4', fontWeight: 700 }}>{s.xp} XP</td>
+                          <td style={{ padding: '12px', color: '#f59e0b', fontWeight: 700 }}>{s.coins}</td>
+                          <td style={{ padding: '12px', color: '#f97316', fontWeight: 700 }}>{s.streak} Days</td>
+                          <td style={{ padding: '12px', color: '#10b981', fontWeight: 600 }}>
+                            {Math.floor((s.dailyActiveSeconds || 0) / 60)} Mins
+                          </td>
+                          <td style={{ padding: '12px', color: '#8b5cf6', fontWeight: 700 }}>
+                            {s.completedGames?.length || 0} Games
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredStudents.length === 0 && (
+                        <tr>
+                          <td colSpan={10} style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>
+                            No students matching filters found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                /* Student Cards Grid */
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(250px, 1fr))',
+                  gap: '1.25rem',
+                  marginTop: '0.5rem'
+                }}>
+                  {filteredStudents.map((s, idx) => (
+                    <div 
+                      key={idx}
+                      className="glass-card hover-lift"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.8rem',
+                        padding: '1.5rem 1.25rem',
+                        position: 'relative',
+                        border: '1px solid rgba(255, 255, 255, 0.06)'
+                      }}
+                    >
+                      {/* Rank Indicator Badge */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        fontSize: '0.72rem',
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        padding: '2px 8px',
+                        borderRadius: '20px',
+                        fontWeight: 800,
+                        color: '#94a3b8'
+                      }}>
+                        #{idx + 1}
+                      </div>
+
+                      {/* Name & Grade/School */}
+                      <div>
+                        <h4 style={{ fontSize: '1.05rem', fontWeight: 800, margin: '0 0 4px 0', paddingRight: '2.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {s.name}
+                        </h4>
+                        <span style={{ fontSize: '0.78rem', color: '#94a3b8', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {s.grade} • {getSchoolName(s.school)}
+                        </span>
+                      </div>
+
+                      <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+
+                      {/* Info list */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.82rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8' }}>Mobile:</span>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{s.mobileNumber}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8' }}>XP Level:</span>
+                          <span style={{ color: '#06b6d4', fontWeight: 800 }}>{s.xp} XP</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8' }}>Coins:</span>
+                          <span style={{ color: '#f59e0b', fontWeight: 700 }}>{s.coins}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8' }}>Streak:</span>
+                          <span style={{ color: '#f97316', fontWeight: 700 }}>{s.streak} Days 🔥</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8' }}>Speaking:</span>
+                          <span style={{ color: '#10b981', fontWeight: 700 }}>{Math.floor((s.dailyActiveSeconds || 0) / 60)} Mins</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#94a3b8' }}>Completed Games:</span>
+                          <span style={{ color: '#8b5cf6', fontWeight: 700 }}>{s.completedGames?.length || 0} Games 🎮</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {filteredStudents.length === 0 && (
+                    <div style={{ gridColumn: '1 / -1', padding: '30px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+                      No students matching filters found.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </>
