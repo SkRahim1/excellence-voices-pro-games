@@ -8,24 +8,36 @@ interface LeaderboardPlayer {
   grade: string;
   xp: number;
   isSelf: boolean;
+  school?: string;
 }
 
 interface LeaderboardModalProps {
   onClose: () => void;
-  leaderboard: LeaderboardPlayer[];
+  schoolLeaderboard: LeaderboardPlayer[];
+  globalLeaderboard: LeaderboardPlayer[];
+  initialTab?: 'school' | 'global';
 }
 
-export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, leaderboard }) => {
+export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ 
+  onClose, 
+  schoolLeaderboard, 
+  globalLeaderboard, 
+  initialTab = 'school' 
+}) => {
   const { school, theme } = useUserStore();
+  const [activeTab, setActiveTab] = React.useState<'school' | 'global'>(initialTab);
 
-  const playersWithRank = leaderboard.map((player, index) => ({
+  const currentLeaderboard = activeTab === 'school' ? schoolLeaderboard : globalLeaderboard;
+
+  const playersWithRank = currentLeaderboard.map((player, index) => ({
     ...player,
     rank: index + 1
   }));
 
-  const top10 = playersWithRank.slice(0, 10);
+  const limitCount = activeTab === 'school' ? 10 : 20;
+  const displayPlayers = playersWithRank.slice(0, limitCount);
   const selfIndex = playersWithRank.findIndex(p => p.isSelf);
-  const isSelfInTop10 = selfIndex >= 0 && selfIndex < 10;
+  const isSelfInDisplayList = selfIndex >= 0 && selfIndex < limitCount;
   const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : null;
 
   return (
@@ -48,7 +60,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, lea
         maxWidth: '550px',
         width: '100%',
         padding: '2rem',
-        maxHeight: '85vh',
+        maxHeight: '88vh',
         display: 'flex',
         flexDirection: 'column',
         gap: '1.25rem',
@@ -82,11 +94,80 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, lea
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '1rem' }}>
           <Trophy style={{ color: '#eab308', width: '28px', height: '28px' }} />
           <div>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>School Standings</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>
+              {activeTab === 'school' ? 'School Standings' : 'All-School Standings'}
+            </h2>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Top 10 leaderboard for <strong>{getSchoolName(school) || 'your school'}</strong>
+              {activeTab === 'school' ? (
+                <>Top 10 leaderboard for <strong>{getSchoolName(school) || 'your school'}</strong></>
+              ) : (
+                <>Top 20 leaderboard across <strong>all participating schools</strong></>
+              )}
             </span>
           </div>
+        </div>
+
+        {/* Tab Switcher */}
+        <div style={{
+          display: 'flex',
+          background: theme === 'kids' ? '#f0f9ff' : 'rgba(255, 255, 255, 0.05)',
+          padding: '4px',
+          borderRadius: '12px',
+          border: theme === 'kids' ? '2px solid #bae6fd' : '1px solid rgba(255, 255, 255, 0.08)',
+          gap: '4px',
+          marginTop: '-0.25rem',
+          marginBottom: '0.25rem'
+        }}>
+          <button
+            onClick={() => setActiveTab('school')}
+            style={{
+              flex: 1,
+              padding: '10px 12px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 800,
+              fontSize: '0.88rem',
+              transition: 'all 0.2s ease',
+              background: activeTab === 'school'
+                ? (theme === 'kids' ? '#0284c7' : 'var(--accent-gradient)')
+                : 'transparent',
+              color: activeTab === 'school'
+                ? '#ffffff'
+                : (theme === 'kids' ? '#0369a1' : 'var(--text-muted)'),
+              boxShadow: activeTab === 'school' && theme !== 'kids'
+                ? '0 4px 12px var(--accent-glow)'
+                : 'none',
+              outline: 'none'
+            }}
+          >
+            🏫 My School
+          </button>
+          <button
+            onClick={() => setActiveTab('global')}
+            style={{
+              flex: 1,
+              padding: '10px 12px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 800,
+              fontSize: '0.88rem',
+              transition: 'all 0.2s ease',
+              background: activeTab === 'global'
+                ? (theme === 'kids' ? '#0284c7' : 'var(--accent-gradient)')
+                : 'transparent',
+              color: activeTab === 'global'
+                ? '#ffffff'
+                : (theme === 'kids' ? '#0369a1' : 'var(--text-muted)'),
+              boxShadow: activeTab === 'global' && theme !== 'kids'
+                ? '0 4px 12px var(--accent-glow)'
+                : 'none',
+              outline: 'none'
+            }}
+          >
+            🌍 All Schools (Top 20)
+          </button>
         </div>
 
         {/* Leaderboard Table / List */}
@@ -98,7 +179,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, lea
           gap: '0.5rem',
           paddingRight: '0.25rem' 
         }}>
-          {top10.map((player) => {
+          {displayPlayers.map((player) => {
             const isGold = player.rank === 1;
             const isSilver = player.rank === 2;
             const isBronze = player.rank === 3;
@@ -144,8 +225,29 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, lea
                   <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
                     {player.name.replace(' (You)', '')} {player.isSelf && '🏆'}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: player.isSelf ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)' }}>
-                    {player.grade}
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    alignItems: 'center', 
+                    gap: '0.4rem', 
+                    fontSize: '0.75rem', 
+                    color: player.isSelf ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)' 
+                  }}>
+                    <span>{player.grade}</span>
+                    {activeTab === 'global' && player.school && (
+                      <>
+                        <span style={{ opacity: 0.5 }}>•</span>
+                        <span style={{
+                          background: player.isSelf ? 'rgba(255,255,255,0.2)' : 'rgba(255, 255, 255, 0.05)',
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          fontSize: '0.68rem',
+                          fontWeight: 700
+                        }}>
+                          {getSchoolName(player.school)}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -158,8 +260,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, lea
             );
           })}
 
-          {/* If the current student is not in the top 10, append them at the bottom with a divider */}
-          {!isSelfInTop10 && selfPlayer && (
+          {/* If the current student is not in the top display list, append them at the bottom with a divider */}
+          {!isSelfInDisplayList && selfPlayer && (
             <>
               {/* Divider */}
               <div style={{ 
@@ -202,8 +304,29 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({ onClose, lea
                   <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
                     {selfPlayer.name.replace(' (You)', '')} 🏆
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.75)' }}>
-                    {selfPlayer.grade}
+                  <div style={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap', 
+                    alignItems: 'center', 
+                    gap: '0.4rem', 
+                    fontSize: '0.75rem', 
+                    color: 'rgba(255,255,255,0.75)' 
+                  }}>
+                    <span>{selfPlayer.grade}</span>
+                    {activeTab === 'global' && selfPlayer.school && (
+                      <>
+                        <span style={{ opacity: 0.5 }}>•</span>
+                        <span style={{
+                          background: 'rgba(255,255,255,0.2)',
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          fontSize: '0.68rem',
+                          fontWeight: 700
+                        }}>
+                          {getSchoolName(selfPlayer.school)}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 

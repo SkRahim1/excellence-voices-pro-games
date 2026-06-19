@@ -3,7 +3,7 @@ import { useUserStore } from '../store/userStore';
 import { Flame, Star, Coins, Play, CheckCircle, Settings } from 'lucide-react';
 import { getSchoolName } from '../data/schools';
 import { db, isFirebaseEnabled } from '../firebase/config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { LeaderboardModal } from './LeaderboardModal';
 
 interface DashboardProps {
@@ -35,80 +35,161 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [globalLeaderboard, setGlobalLeaderboard] = useState<any[]>([]);
+  const [leaderboardTab, setLeaderboardTab] = useState<'school' | 'global'>('school');
   const [loading, setLoading] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
 
   useEffect(() => {
     let active = true;
     const fetchLeaderboard = async () => {
-      if (!isFirebaseEnabled || !db || !school) {
-        // Fallback to static mock data if firebase is disabled
-        const mockData = [
-          { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200, isSelf: false },
-          { name: 'Amit', grade: grade || 'Grade 7', xp: 1800, isSelf: false },
-          { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500, isSelf: false },
-          { name: `${name} (You)`, grade: grade || 'Grade 7', xp: xp, isSelf: true }
+      const fallbackSchool = [
+        { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 2200, isSelf: false },
+        { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1800, isSelf: false },
+        { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1500, isSelf: false },
+        { name: `${name} (You)`, grade: grade || 'Grade 7', school: school || 'exscl-02', xp: xp, isSelf: true }
+      ];
+
+      const getFallbackGlobal = () => {
+        const list = [
+          { name: 'Aditya', grade: 'Grade 8', school: 'exscl-01', xp: 4500, isSelf: false },
+          { name: 'Sneha', grade: grade || 'Grade 7', school: 'exscl-02', xp: 3800, isSelf: false },
+          { name: 'Vikram', grade: 'Grade 9', school: 'exscl-05', xp: 3500, isSelf: false },
+          { name: 'Priya', grade: 'Grade 6', school: 'exscl-03', xp: 3200, isSelf: false },
+          { name: 'Rahul', grade: 'Grade 8', school: 'exscl-06', xp: 2900, isSelf: false },
+          { name: 'Ananya', grade: 'Grade 7', school: 'exscl-01', xp: 2700, isSelf: false },
+          { name: 'Karan', grade: 'Grade 9', school: 'exscl-04', xp: 2500, isSelf: false },
+          { name: 'Tanvi', grade: 'Grade 6', school: 'exscl-07', xp: 2300, isSelf: false },
+          { name: 'Kunal', grade: 'Grade 8', school: 'exscl-08', xp: 2100, isSelf: false },
+          { name: 'Riddhi', grade: 'Grade 7', school: 'exscl-09', xp: 2000, isSelf: false },
+          { name: 'Amit', grade: grade || 'Grade 7', school: 'exscl-02', xp: 1800, isSelf: false },
+          { name: 'Rohan', grade: grade || 'Grade 7', school: 'exscl-02', xp: 1500, isSelf: false },
+          { name: 'Siddharth', grade: 'Grade 9', school: 'exscl-10', xp: 1700, isSelf: false },
+          { name: 'Meera', grade: 'Grade 8', school: 'exscl-11', xp: 1600, isSelf: false },
+          { name: 'Dev', grade: 'Grade 6', school: 'exscl-12', xp: 1400, isSelf: false },
+          { name: 'Riya', grade: 'Grade 7', school: 'exscl-13', xp: 1300, isSelf: false },
+          { name: 'Arjun', grade: 'Grade 9', school: 'exscl-14', xp: 1200, isSelf: false },
+          { name: 'Ishita', grade: 'Grade 8', school: 'exscl-15', xp: 1100, isSelf: false },
+          { name: 'Yash', grade: 'Grade 7', school: 'exscl-16', xp: 950, isSelf: false },
+          { name: 'Nisha', grade: 'Grade 6', school: 'exscl-17', xp: 800, isSelf: false }
         ];
-        if (active) setLeaderboard(mockData.sort((a, b) => b.xp - a.xp));
+
+        // Ensure user is present in fallback global
+        if (!list.some(p => p.name.includes('(You)') || p.isSelf)) {
+          list.push({
+            name: `${name} (You)`,
+            grade: grade || 'Grade 7',
+            school: school || 'exscl-02',
+            xp: xp,
+            isSelf: true
+          });
+        }
+        return list.sort((a, b) => b.xp - a.xp);
+      };
+
+      if (!isFirebaseEnabled || !db) {
+        if (active) {
+          setLeaderboard(fallbackSchool.sort((a, b) => b.xp - a.xp));
+          setGlobalLeaderboard(getFallbackGlobal());
+        }
         return;
       }
 
       setLoading(true);
       try {
-        const q = query(collection(db, 'students'), where('school', '==', school));
-        const querySnapshot = await getDocs(q);
-        const playersList: any[] = [];
-        
-        querySnapshot.forEach((doc) => {
+        // Fetch School Leaderboard
+        let schoolPlayers: any[] = [];
+        if (school) {
+          const qSchool = query(collection(db, 'students'), where('school', '==', school));
+          const querySnapshot = await getDocs(qSchool);
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const isSelf = data.name === name || data.mobileNumber === useUserStore.getState().mobileNumber;
+            schoolPlayers.push({
+              name: isSelf ? `${name} (You)` : data.name,
+              grade: data.grade || 'Grade 7',
+              school: data.school || school,
+              xp: data.xp || 0,
+              isSelf
+            });
+          });
+        }
+
+        if (!schoolPlayers.some(p => p.isSelf)) {
+          schoolPlayers.push({
+            name: `${name} (You)`,
+            grade: grade || 'Grade 7',
+            school: school || 'exscl-02',
+            xp: xp,
+            isSelf: true
+          });
+        }
+        schoolPlayers.sort((a, b) => b.xp - a.xp);
+
+        // Fill school if needed
+        const baseMocks = [
+          { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 2200 },
+          { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1800 },
+          { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1500 },
+        ];
+        let mockIndex = 0;
+        while (schoolPlayers.length < 4 && mockIndex < baseMocks.length) {
+          const mock = baseMocks[mockIndex++];
+          if (!schoolPlayers.some(p => p.name === mock.name)) {
+            schoolPlayers.push({ ...mock, isSelf: false });
+          }
+        }
+        schoolPlayers.sort((a, b) => b.xp - a.xp);
+
+        // Fetch Global Leaderboard (limiting queries is good, but we can query top 50 in firestore using limit)
+        const qGlobal = query(collection(db, 'students'), orderBy('xp', 'desc'), limit(50));
+        const globalSnapshot = await getDocs(qGlobal);
+        const globalPlayers: any[] = [];
+        globalSnapshot.forEach((doc) => {
           const data = doc.data();
           const isSelf = data.name === name || data.mobileNumber === useUserStore.getState().mobileNumber;
-          playersList.push({
+          globalPlayers.push({
             name: isSelf ? `${name} (You)` : data.name,
             grade: data.grade || 'Grade 7',
+            school: data.school || 'exscl-02',
             xp: data.xp || 0,
             isSelf
           });
         });
 
-        // Ensure current student is present if not found in db query
-        if (!playersList.some(p => p.isSelf)) {
-          playersList.push({
+        // Ensure user is present in global list
+        if (!globalPlayers.some(p => p.isSelf)) {
+          globalPlayers.push({
             name: `${name} (You)`,
             grade: grade || 'Grade 7',
+            school: school || 'exscl-02',
             xp: xp,
             isSelf: true
           });
         }
+        globalPlayers.sort((a, b) => b.xp - a.xp);
 
-        // Sort by XP descending
-        playersList.sort((a, b) => b.xp - a.xp);
-
-        // If there are fewer than 4 players, fill with realistic mock players
-        const baseMocks = [
-          { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200 },
-          { name: 'Amit', grade: grade || 'Grade 7', xp: 1800 },
-          { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500 },
-        ];
-        
-        let mockIndex = 0;
-        while (playersList.length < 4 && mockIndex < baseMocks.length) {
-          const mock = baseMocks[mockIndex++];
-          if (!playersList.some(p => p.name === mock.name)) {
-            playersList.push({ ...mock, isSelf: false });
+        // Fill global if fewer than 20
+        const globalMocks = getFallbackGlobal();
+        let gMockIndex = 0;
+        while (globalPlayers.length < 20 && gMockIndex < globalMocks.length) {
+          const mock = globalMocks[gMockIndex++];
+          if (!globalPlayers.some(p => p.name.replace(' (You)', '') === mock.name.replace(' (You)', ''))) {
+            globalPlayers.push({ ...mock, isSelf: false });
           }
         }
-        playersList.sort((a, b) => b.xp - a.xp);
+        globalPlayers.sort((a, b) => b.xp - a.xp);
 
-        if (active) setLeaderboard(playersList);
+        if (active) {
+          setLeaderboard(schoolPlayers);
+          setGlobalLeaderboard(globalPlayers);
+        }
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
-        const mockData = [
-          { name: 'Sneha', grade: grade || 'Grade 7', xp: 2200, isSelf: false },
-          { name: 'Amit', grade: grade || 'Grade 7', xp: 1800, isSelf: false },
-          { name: 'Rohan', grade: grade || 'Grade 7', xp: 1500, isSelf: false },
-          { name: `${name} (You)`, grade: grade || 'Grade 7', xp: xp, isSelf: true }
-        ];
-        if (active) setLeaderboard(mockData.sort((a, b) => b.xp - a.xp));
+        if (active) {
+          setLeaderboard(fallbackSchool.sort((a, b) => b.xp - a.xp));
+          setGlobalLeaderboard(getFallbackGlobal());
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -345,10 +426,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
             </div>
           ) : (
             (() => {
-              const playersWithRank = leaderboard.map((p, idx) => ({ ...p, rank: idx + 1 }));
+              const currentLeaderboard = leaderboardTab === 'school' ? leaderboard : globalLeaderboard;
+              const playersWithRank = currentLeaderboard.map((p, idx) => ({ ...p, rank: idx + 1 }));
               const selfIndex = playersWithRank.findIndex(p => p.isSelf);
               const selfRank = selfIndex >= 0 ? selfIndex + 1 : 1;
-              const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : { name: name, grade: grade, xp: xp, isSelf: true, rank: 1 };
+              const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : { name: name, grade: grade, school: school, xp: xp, isSelf: true, rank: 1 };
 
               let dashboardPlayers: any[] = [];
               if (selfIndex <= 2 || selfIndex === -1) {
@@ -369,30 +451,85 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
 
               return (
                 <>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-divider)', paddingBottom: '0.5rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0 }}>
-                      🏆 {getSchoolName(school) || 'School'} Standings
-                    </h3>
-                    <button 
-                      onClick={() => setShowLeaderboardModal(true)}
-                      style={{ 
-                        fontSize: '0.78rem', 
-                        color: 'var(--accent-cyan)', 
-                        fontWeight: 800, 
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        background: 'rgba(6, 182, 212, 0.08)',
-                        border: '1px solid rgba(6, 182, 212, 0.2)',
-                        padding: '4px 10px',
-                        borderRadius: '20px',
-                        outline: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      Rank #{selfRank} of {playersWithRank.length} 🔍
-                    </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', borderBottom: '1px solid var(--border-divider)', paddingBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '60%' }}>
+                        🏆 {leaderboardTab === 'school' ? (getSchoolName(school) || 'School') : 'All Schools'} Standings
+                      </h3>
+                      <button 
+                        onClick={() => setShowLeaderboardModal(true)}
+                        style={{ 
+                          fontSize: '0.75rem', 
+                          color: 'var(--accent-cyan)', 
+                          fontWeight: 800, 
+                          textTransform: 'uppercase',
+                          cursor: 'pointer',
+                          background: 'rgba(6, 182, 212, 0.08)',
+                          border: '1px solid rgba(6, 182, 212, 0.2)',
+                          padding: '3px 8px',
+                          borderRadius: '20px',
+                          outline: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        Rank #{selfRank} of {playersWithRank.length} 🔍
+                      </button>
+                    </div>
+
+                    {/* Tab Switcher */}
+                    <div style={{ 
+                      display: 'flex', 
+                      background: theme === 'kids' ? '#f0f9ff' : 'rgba(255, 255, 255, 0.04)', 
+                      borderRadius: '8px', 
+                      padding: '2px', 
+                      border: theme === 'kids' ? '1px solid #bae6fd' : '1px solid rgba(255, 255, 255, 0.06)',
+                      width: 'fit-content'
+                    }}>
+                      <button
+                        onClick={() => setLeaderboardTab('school')}
+                        style={{
+                          padding: '4px 12px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          background: leaderboardTab === 'school' 
+                            ? (theme === 'kids' ? '#0284c7' : 'var(--accent-gradient)') 
+                            : 'transparent',
+                          color: leaderboardTab === 'school' 
+                            ? '#ffffff' 
+                            : (theme === 'kids' ? '#0369a1' : 'var(--text-muted)'),
+                          boxShadow: leaderboardTab === 'school' && theme !== 'kids' ? '0 2px 8px var(--accent-glow)' : 'none',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        🏫 My School
+                      </button>
+                      <button
+                        onClick={() => setLeaderboardTab('global')}
+                        style={{
+                          padding: '4px 12px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '0.72rem',
+                          fontWeight: 800,
+                          background: leaderboardTab === 'global' 
+                            ? (theme === 'kids' ? '#0284c7' : 'var(--accent-gradient)') 
+                            : 'transparent',
+                          color: leaderboardTab === 'global' 
+                            ? '#ffffff' 
+                            : (theme === 'kids' ? '#0369a1' : 'var(--text-muted)'),
+                          boxShadow: leaderboardTab === 'global' && theme !== 'kids' ? '0 2px 8px var(--accent-glow)' : 'none',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        🌍 Global (Top 20)
+                      </button>
+                    </div>
                   </div>
 
                   {/* Horizontal Podium Layout */}
@@ -689,7 +826,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       {showLeaderboardModal && (
         <LeaderboardModal 
           onClose={() => setShowLeaderboardModal(false)} 
-          leaderboard={leaderboard} 
+          schoolLeaderboard={leaderboard} 
+          globalLeaderboard={globalLeaderboard}
+          initialTab={leaderboardTab}
         />
       )}
 
