@@ -361,6 +361,41 @@ export const OnboardingForm: React.FC = () => {
             >
               {loading ? 'Logging In...' : 'Log In 🚀'}
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                window.location.hash = 'admin';
+              }}
+              style={{
+                marginTop: '1rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'var(--text-muted)',
+                padding: '0.8rem',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                borderRadius: 'var(--radius-btn)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.borderColor = 'var(--accent-cyan)';
+                e.currentTarget.style.background = 'rgba(6, 182, 212, 0.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-muted)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+              }}
+            >
+              🔒 Admin Login Portal
+            </button>
           </form>
         )}
       </div>

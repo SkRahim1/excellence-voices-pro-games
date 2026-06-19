@@ -17,13 +17,29 @@ import { LockoutScreen } from './components/LockoutScreen';
 import { HelpModal } from './components/HelpModal';
 import { SettingsModal } from './components/SettingsModal';
 import { useSpeech } from './hooks/useSpeech';
+import { AdminPortal } from './components/AdminPortal';
 
 function App() {
+  const [isAdminMode, setIsAdminMode] = useState(() => {
+    return window.location.search.includes('admin=true') || window.location.hash.includes('admin');
+  });
+
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, lastActiveDate, tickActiveTime, checkDailyReset } = useUserStore();
   const { cancel } = useSpeech();
+
+  // Listen to hash change to toggle admin mode
+  useEffect(() => {
+    const handleHashChange = () => {
+      setIsAdminMode(window.location.search.includes('admin=true') || window.location.hash.includes('admin'));
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   // Synchronize selectedGame state with browser history popstate to handle back button
   useEffect(() => {
@@ -108,6 +124,11 @@ function App() {
   // Check if the calendar day has changed (synchronous reset override)
   const today = getTodayDateString();
   const isNewDay = lastActiveDate && lastActiveDate !== today;
+
+  // Render Admin Portal if admin mode is active
+  if (isAdminMode) {
+    return <AdminPortal />;
+  }
 
   // If daily practice limit of 40 minutes (2400 seconds) is reached, lock the portal
   if (onboarded && dailyActiveSeconds >= 2400 && !isNewDay) {
