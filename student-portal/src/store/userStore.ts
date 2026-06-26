@@ -37,6 +37,9 @@ interface UserState {
   chessHighScore: number;
   escapeRoomHighScore: number;
   riyanStoryLevelIndex: number;
+  speakScoreHighScore: number;
+  idiomMatchLevelIndex: number;
+  timeTransformerLevelIndex: number;
   
   addXp: (amount: number) => void;
   addCoins: (amount: number) => void;
@@ -55,6 +58,9 @@ interface UserState {
   setRiyanStoryLevelIndex: (levelIndex: number) => void;
   setChessHighScore: (score: number) => void;
   setEscapeRoomHighScore: (score: number) => void;
+  setSpeakScoreHighScore: (score: number) => void;
+  setIdiomMatchLevelIndex: (levelIndex: number) => void;
+  setTimeTransformerLevelIndex: (levelIndex: number) => void;
   registerStudent: (details: { name: string; grade: string; school: string; mobileNumber: string }) => void;
   loginStudent: (mobileNumber: string) => Promise<boolean>;
   tickActiveTime: (seconds: number) => void;
@@ -104,6 +110,9 @@ export const useUserStore = create<UserState>()(
         chessHighScore: 0,
         escapeRoomHighScore: 0,
         riyanStoryLevelIndex: 0,
+        speakScoreHighScore: 0,
+        idiomMatchLevelIndex: 0,
+        timeTransformerLevelIndex: 0,
 
         addXp: (amount) =>
           set((state) => {
@@ -216,6 +225,24 @@ export const useUserStore = create<UserState>()(
             syncStoreToCloud({ riyanStoryLevelIndex: levelIndex });
             return { riyanStoryLevelIndex: levelIndex };
           }),
+        setSpeakScoreHighScore: (score) =>
+          set((state) => {
+            if (score > (state.speakScoreHighScore || 0)) {
+              syncStoreToCloud({ speakScoreHighScore: score });
+              return { speakScoreHighScore: score };
+            }
+            return {};
+          }),
+        setIdiomMatchLevelIndex: (levelIndex) =>
+          set(() => {
+            syncStoreToCloud({ idiomMatchLevelIndex: levelIndex });
+            return { idiomMatchLevelIndex: levelIndex };
+          }),
+        setTimeTransformerLevelIndex: (levelIndex) =>
+          set(() => {
+            syncStoreToCloud({ timeTransformerLevelIndex: levelIndex });
+            return { timeTransformerLevelIndex: levelIndex };
+          }),
         registerStudent: (details) => {
           const studentData = {
             name: details.name,
@@ -241,6 +268,9 @@ export const useUserStore = create<UserState>()(
             chessHighScore: 0,
             escapeRoomHighScore: 0,
             riyanStoryLevelIndex: 0,
+            speakScoreHighScore: 0,
+            idiomMatchLevelIndex: 0,
+            timeTransformerLevelIndex: 0,
           };
 
           set(() => studentData);
@@ -285,6 +315,9 @@ export const useUserStore = create<UserState>()(
                 chessHighScore: data.chessHighScore ?? 0,
                 escapeRoomHighScore: data.escapeRoomHighScore ?? 0,
                 riyanStoryLevelIndex: data.riyanStoryLevelIndex ?? 0,
+                speakScoreHighScore: data.speakScoreHighScore ?? 0,
+                idiomMatchLevelIndex: data.idiomMatchLevelIndex ?? 0,
+                timeTransformerLevelIndex: data.timeTransformerLevelIndex ?? 0,
               }));
               return true;
             }
@@ -369,6 +402,9 @@ export const useUserStore = create<UserState>()(
               chessHighScore: 0,
               escapeRoomHighScore: 0,
               riyanStoryLevelIndex: 0,
+              speakScoreHighScore: 0,
+              idiomMatchLevelIndex: 0,
+              timeTransformerLevelIndex: 0,
             }).catch((err) => console.error('Cloud reset failed:', err));
           }
 
@@ -397,6 +433,9 @@ export const useUserStore = create<UserState>()(
             chessHighScore: 0,
             escapeRoomHighScore: 0,
             riyanStoryLevelIndex: 0,
+            speakScoreHighScore: 0,
+            idiomMatchLevelIndex: 0,
+            timeTransformerLevelIndex: 0,
           }));
         },
         logout: () => {
@@ -424,6 +463,9 @@ export const useUserStore = create<UserState>()(
             chessHighScore: 0,
             escapeRoomHighScore: 0,
             riyanStoryLevelIndex: 0,
+            speakScoreHighScore: 0,
+            idiomMatchLevelIndex: 0,
+            timeTransformerLevelIndex: 0,
           }));
         },
       };

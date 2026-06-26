@@ -31,7 +31,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     dailyActiveSeconds,
     chessHighScore,
     escapeRoomHighScore,
-    riyanStoryLevelIndex
+    riyanStoryLevelIndex,
+    speakScoreHighScore,
+    idiomMatchLevelIndex,
+    timeTransformerLevelIndex
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -39,6 +42,43 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   const [leaderboardTab, setLeaderboardTab] = useState<'school' | 'global'>('school');
   const [loading, setLoading] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
+  const [showNewGamesPopup, setShowNewGamesPopup] = useState<boolean>(false);
+
+  const isNewGame = (gameId: string): boolean => {
+    const newGameIds = ['speak-score', 'idiom-match', 'time-transformer'];
+    if (!newGameIds.includes(gameId)) return false;
+    
+    // 7 days from release date (2026-06-26)
+    const releaseDate = new Date('2026-06-26T00:00:00').getTime();
+    const currentDate = new Date().getTime();
+    const diffDays = (currentDate - releaseDate) / (1000 * 60 * 60 * 24);
+    
+    return diffDays >= 0 && diffDays <= 7;
+  };
+
+  useEffect(() => {
+    const releaseDate = new Date('2026-06-26T00:00:00').getTime();
+    const currentDate = new Date().getTime();
+    const diffDays = (currentDate - releaseDate) / (1000 * 60 * 60 * 24);
+    
+    if (diffDays >= 0 && diffDays <= 5) {
+      const dismissed = localStorage.getItem('excellence-voices-new-games-popup-dismissed');
+      if (!dismissed) {
+        setShowNewGamesPopup(true);
+      }
+    }
+  }, []);
+
+  const handleDismissPopup = () => {
+    localStorage.setItem('excellence-voices-new-games-popup-dismissed', 'true');
+    setShowNewGamesPopup(false);
+  };
+
+  const handlePlayGameFromPopup = (gameId: string) => {
+    localStorage.setItem('excellence-voices-new-games-popup-dismissed', 'true');
+    setShowNewGamesPopup(false);
+    onSelectGame(gameId);
+  };
 
   useEffect(() => {
     let active = true;
@@ -291,6 +331,33 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       difficulty: 'Beginner / Intermediate',
       xpReward: 120,
       iconColor: 'from-rose-500 to-pink-600',
+    },
+    {
+      id: 'speak-score',
+      title: 'Speak & Score 🎤',
+      desc: 'Improve your pronunciation and speaking confidence! Read sentences aloud and get real-time feedback on Accuracy, Pronunciation, and Fluency.',
+      duration: 'Adaptive',
+      difficulty: 'Beginner / Intermediate / Advanced',
+      xpReward: 100,
+      iconColor: 'from-emerald-400 to-green-600',
+    },
+    {
+      id: 'idiom-match',
+      title: 'Idiom Match 🧩',
+      desc: 'Master 50+ common English idioms! Learn their meanings and solve matching puzzles across 10 interactive levels.',
+      duration: '50 Mins',
+      difficulty: 'Easy / Medium',
+      xpReward: 120,
+      iconColor: 'from-amber-500 to-yellow-600',
+    },
+    {
+      id: 'time-transformer',
+      title: 'Time Expression Transformer 🔮',
+      desc: 'Master advanced verb tenses by speaking sentences transformed with targeted time words across 11 levels.',
+      duration: '60 Mins',
+      difficulty: 'Difficult',
+      xpReward: 120,
+      iconColor: 'from-fuchsia-600 to-pink-600',
     },
   ];
 
@@ -640,13 +707,28 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                     fontSize: '1.5rem',
                     color: 'white'
                   }}>
-                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : '🔊'}
+                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : game.id === 'speak-score' ? '🎤' : game.id === 'idiom-match' ? '🧩' : game.id === 'time-transformer' ? '🔮' : '🔊'}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {game.title}
                       {isCompleted && (
                         <CheckCircle style={{ width: '16px', height: '16px', color: '#10b981', fill: '#10b981' }} />
+                      )}
+                      {isNewGame(game.id) && (
+                        <span style={{
+                          background: 'linear-gradient(to right, #f43f5e, #be185d)',
+                          color: '#ffffff',
+                          fontSize: '0.7rem',
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: '50px',
+                          fontWeight: 800,
+                          letterSpacing: '0.05em',
+                          animation: 'pulse 1.5s infinite ease-in-out',
+                          boxShadow: '0 2px 8px rgba(244, 63, 94, 0.4)'
+                        }}>
+                          NEW 🚀
+                        </span>
                       )}
                     </h4>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', maxWidth: '100%' }}>
@@ -657,7 +739,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                       <span style={{ color: 'var(--text-muted)' }}>⏱️ {game.duration}</span>
                       <span style={{ color: 'var(--accent-cyan)' }}>⭐ +{game.xpReward} XP</span>
                       <span style={{ color: '#eab308' }}>🏆 {game.difficulty}</span>
-                      {['grammar-galaxy', 'modal-mind', 'what-yes-or-no', 'modal-time-fusion'].includes(game.id) && (
+                      {['grammar-galaxy', 'modal-mind', 'what-yes-or-no', 'modal-time-fusion', 'time-transformer'].includes(game.id) && (
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
@@ -785,6 +867,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                       </div>
                     )}
 
+                    {game.id === 'speak-score' && speakScoreHighScore > 0 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 800 }}>
+                          🏆 High Score: {speakScoreHighScore}%
+                        </div>
+                      </div>
+                    )}
+
                     {game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5 && (
                       <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 700 }}>
@@ -793,6 +883,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                         </div>
                         <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
                           <div style={{ width: `${(riyanStoryLevelIndex / 5) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                        </div>
+                      </div>
+                    )}
+
+                    {game.id === 'idiom-match' && idiomMatchLevelIndex > 0 && idiomMatchLevelIndex < 10 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 700 }}>
+                          <span>Level Progress</span>
+                          <span>Level {idiomMatchLevelIndex + 1} of 10 ({Math.round((idiomMatchLevelIndex / 10) * 100)}%)</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(idiomMatchLevelIndex / 10) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                        </div>
+                      </div>
+                    )}
+
+                    {game.id === 'time-transformer' && timeTransformerLevelIndex > 0 && timeTransformerLevelIndex < 11 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 700 }}>
+                          <span>Level Progress</span>
+                          <span>Level {timeTransformerLevelIndex + 1} of 11 ({Math.round((timeTransformerLevelIndex / 11) * 100)}%)</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(timeTransformerLevelIndex / 11) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
                         </div>
                       </div>
                     )}
@@ -806,7 +920,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                   (game.id === 'modal-mind' && modalLevelIndex > 0) ||
                   (game.id === 'what-yes-or-no' && whatYesOrNoLevelIndex > 0) ||
                   (game.id === 'modal-time-fusion' && modalTimeFusionLevelIndex > 0) ||
-                  (game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5)) && !isCompleted ? (
+                  (game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5) ||
+                  (game.id === 'idiom-match' && idiomMatchLevelIndex > 0 && idiomMatchLevelIndex < 10) ||
+                  (game.id === 'time-transformer' && timeTransformerLevelIndex > 0 && timeTransformerLevelIndex < 11)) && !isCompleted ? (
                   <button className="game-card-resume-btn">
                     <Play style={{ width: '14px', height: '14px', fill: 'currentColor' }} />
                     Resume
@@ -860,6 +976,198 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
           Renvix Technologies
         </a>
       </footer>
+
+      {showNewGamesPopup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(3, 7, 18, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          padding: '1.5rem',
+          boxSizing: 'border-box'
+        }}>
+          <div className="glass-card" style={{
+            maxWidth: '650px',
+            width: '100%',
+            background: 'rgba(15, 23, 42, 0.95)',
+            border: '2px solid var(--accent-cyan)',
+            borderRadius: '24px',
+            padding: '2rem 1.75rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+            boxShadow: '0 20px 50px rgba(6, 182, 212, 0.25)',
+            position: 'relative',
+            color: '#ffffff',
+            boxSizing: 'border-box'
+          }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                background: 'var(--accent-gradient)',
+                color: 'white',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                padding: '0.3rem 0.8rem',
+                borderRadius: '50px',
+                display: 'inline-block',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '0.5rem'
+              }}>
+                🎉 Update Released!
+              </div>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, background: 'linear-gradient(to right, #06b6d4, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Three New English Games!
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.4rem' }}>
+                We have added three brand-new interactive speaking and match games to help you build confidence and master English!
+              </p>
+            </div>
+
+            {/* Games Showcase */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              {/* Game 1: Speak & Score */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '16px',
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }} 
+              className="hover-lift"
+              onClick={() => handlePlayGameFromPopup('speak-score')}
+              >
+                <div style={{ fontSize: '2rem', background: 'rgba(16, 185, 129, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0 }}>
+                  🎤
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    Speak & Score
+                    <span style={{ fontSize: '0.65rem', background: '#10b981', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
+                  </h4>
+                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
+                    Practice reading sentences aloud and get immediate AI evaluation on your Accuracy, Pronunciation, and Fluency!
+                  </p>
+                </div>
+              </div>
+
+              {/* Game 2: Idiom Match */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '16px',
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }} 
+              className="hover-lift"
+              onClick={() => handlePlayGameFromPopup('idiom-match')}
+              >
+                <div style={{ fontSize: '2rem', background: 'rgba(245, 158, 11, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', flexShrink: 0 }}>
+                  🧩
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    Idiom Match
+                    <span style={{ fontSize: '0.65rem', background: '#f59e0b', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
+                  </h4>
+                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
+                    Learn 50+ common English idioms with voice guidelines, then test your knowledge with interactive matching puzzles.
+                  </p>
+                </div>
+              </div>
+
+              {/* Game 3: Time Expression Transformer */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '16px',
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }} 
+              className="hover-lift"
+              onClick={() => handlePlayGameFromPopup('time-transformer')}
+              >
+                <div style={{ fontSize: '2rem', background: 'rgba(168, 85, 247, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a855f7', flexShrink: 0 }}>
+                  🔮
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    Time Expression Transformer
+                    <span style={{ fontSize: '0.65rem', background: '#a855f7', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
+                  </h4>
+                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
+                    Transform base simple present sentences to match advanced time expressions in 11 progressive speech challenges!
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+              <button 
+                onClick={handleDismissPopup}
+                style={{
+                  flex: 1,
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#e2e8f0',
+                  padding: '0.75rem 1.5rem',
+                  fontWeight: 700,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s'
+                }}
+                className="hover-lift"
+              >
+                Explore Later
+              </button>
+              <button 
+                onClick={handleDismissPopup}
+                style={{
+                  flex: 1.5,
+                  background: 'var(--accent-gradient)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  fontWeight: 800,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  boxShadow: '0 4px 15px var(--accent-glow)',
+                  transition: 'all 0.2s'
+                }}
+                className="hover-lift"
+              >
+                Let's Play! 🚀
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

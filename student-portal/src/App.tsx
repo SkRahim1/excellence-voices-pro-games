@@ -11,6 +11,9 @@ import { ModalTimeFusion } from './components/ModalTimeFusion';
 import { EnglishChess } from './components/EnglishChess';
 import { EscapeRoomEnglish } from './components/EscapeRoomEnglish';
 import { RiyanStoryGame } from './components/RiyanStoryGame';
+import { SpeakScore } from './components/SpeakScore';
+import { IdiomMatch } from './components/IdiomMatch';
+import { TimeTransformer } from './components/TimeTransformer';
 import { OnboardingForm } from './components/OnboardingForm';
 import { Certificate } from './components/Certificate';
 import { LockoutScreen } from './components/LockoutScreen';
@@ -197,16 +200,29 @@ function App() {
             <RiyanStoryGame onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
+          {selectedGame === 'speak-score' && (
+            <SpeakScore onBackToDashboard={() => handleGameSelectState(null)} />
+          )}
+
+          {selectedGame === 'idiom-match' && (
+            <IdiomMatch onBackToDashboard={() => handleGameSelectState(null)} />
+          )}
+
+          {selectedGame === 'time-transformer' && (
+            <TimeTransformer onBackToDashboard={() => handleGameSelectState(null)} />
+          )}
+
           {(selectedGame === 'view-certificate' || selectedGame?.startsWith('view-certificate-')) && (() => {
             const gameId = selectedGame === 'view-certificate' 
               ? 'grammar-galaxy' 
-              : (selectedGame.replace('view-certificate-', '') as 'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion');
+              : (selectedGame.replace('view-certificate-', '') as 'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion' | 'time-transformer');
             
             const gamePrefixMap = {
               'grammar-galaxy': 'EV-GG-EASY',
               'modal-mind': 'EV-MM-MED1',
               'what-yes-or-no': 'EV-WYN-MED2',
-              'modal-time-fusion': 'EV-MTF-ADV'
+              'modal-time-fusion': 'EV-MTF-ADV',
+              'time-transformer': 'EV-TET-ADV'
             };
             const prefix = gamePrefixMap[gameId] || 'EV-CERT';
             const dynamicCertId = `${prefix}-${verificationHash}`;

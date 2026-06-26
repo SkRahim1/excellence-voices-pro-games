@@ -9,7 +9,7 @@ interface CertificateProps {
   onReplay: () => void;
   onBackToDashboard: () => void;
   isPreview?: boolean;
-  gameId?: 'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion';
+  gameId?: 'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion' | 'time-transformer';
 }
 
 interface GameCertMetadata {
@@ -22,7 +22,7 @@ interface GameCertMetadata {
   details: string;
 }
 
-const gameMetadata: Record<'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion', GameCertMetadata> = {
+const gameMetadata: Record<'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 'modal-time-fusion' | 'time-transformer', GameCertMetadata> = {
   'grammar-galaxy': {
     level: 'Foundational Level (Easy)',
     title: 'Time Expression Master',
@@ -58,6 +58,15 @@ const gameMetadata: Record<'grammar-galaxy' | 'modal-mind' | 'what-yes-or-no' | 
     gradientStart: '#d946ef',
     gradientEnd: '#be185d',
     details: 'Demonstrating supreme expertise in constructing complex English sentences using advanced double-blank syntax frames, merging modal verbs with conditional timelines, perfect tenses, and temporal adverbs.'
+  },
+  'time-transformer': {
+    level: 'Difficult Level (Advanced)',
+    title: 'Time Expression Transformer Master',
+    color: '#f43f5e',
+    shadowColor: 'rgba(244, 63, 94, 0.15)',
+    gradientStart: '#f43f5e',
+    gradientEnd: '#e11d48',
+    details: 'Demonstrating supreme command over grammar rules and conversational flow by instantly transforming base structures to fit advanced time markers (like At 9 O\'clock, Already, By Tomorrow, and third conditionals) and delivering them with high oral accuracy.'
   }
 };
 
