@@ -116,13 +116,15 @@ export const useUserStore = create<UserState>()(
 
         addXp: (amount) =>
           set((state) => {
-            const nextXp = state.xp + amount;
+            if (amount <= 0) return {}; // reject invalid/negative awards
+            const nextXp = Math.max(0, state.xp + amount);
             syncStoreToCloud({ xp: nextXp });
             return { xp: nextXp };
           }),
         addCoins: (amount) =>
           set((state) => {
-            const nextCoins = state.coins + amount;
+            if (amount <= 0) return {}; // reject invalid/negative awards
+            const nextCoins = Math.max(0, state.coins + amount);
             syncStoreToCloud({ coins: nextCoins });
             return { coins: nextCoins };
           }),

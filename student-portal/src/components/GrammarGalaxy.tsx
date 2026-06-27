@@ -147,19 +147,19 @@ export const GrammarGalaxy: React.FC<GrammarGalaxyProps> = ({ onBackToDashboard 
     } else {
       // Finished all 5 slides of this level
       setLevelCleared(true);
-      
-      // Award level completion points and coins
-      addXp(50);
-      addCoins(5);
 
-      // Unlock next level in Zustand store
+      // Unlock next level in Zustand store — only on FIRST-TIME completion
       const nextLevel = (selectedLevel ?? 0) + 1;
       if (selectedLevel === grammarGalaxyLevelIndex) {
+        // Award level completion XP & coins only on first-time completion
+        addXp(50);
+        addCoins(5);
         setGrammarGalaxyProgress(nextLevel, 0);
         if (nextLevel >= LEVELS.length) {
           completeGame('grammar-galaxy');
         }
       }
+      // Replaying a cleared level: no XP/coin reward
     }
   };
 

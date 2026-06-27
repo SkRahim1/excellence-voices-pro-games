@@ -113,19 +113,19 @@ export const ModalMind: React.FC<ModalMindProps> = ({ onBackToDashboard }) => {
     } else {
       // Finished level quiz!
       setGameEnded(true);
-      
-      // Completion rewards
-      addXp(50);
-      addCoins(5);
 
-      // Unlock next level in Zustand store
+      // Unlock next level in Zustand store — only on FIRST-TIME completion
       const nextLevel = (selectedLevel ?? 0) + 1;
       if (selectedLevel === modalLevelIndex) {
+        // Award completion rewards only on first-time completion
+        addXp(50);
+        addCoins(5);
         setModalLevelIndex(nextLevel);
         if (nextLevel >= 11) {
           completeGame('modal-mind');
         }
       }
+      // Replaying a cleared level: no XP/coin reward
     }
   };
 

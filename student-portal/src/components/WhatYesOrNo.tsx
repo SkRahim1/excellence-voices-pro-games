@@ -132,19 +132,19 @@ export const WhatYesOrNo: React.FC<WhatYesOrNoProps> = ({ onBackToDashboard }) =
     } else {
       // Completed all 5 rounds
       setLevelCompleted(true);
-      
-      // Completion rewards
-      addXp(50);
-      addCoins(5);
 
-      // Unlock next level
+      // Unlock next level — only on FIRST-TIME completion
       const nextLevel = (selectedLevel ?? 0) + 1;
       if (selectedLevel === whatYesOrNoLevelIndex) {
+        // Award completion rewards only on first-time completion
+        addXp(50);
+        addCoins(5);
         setWhatYesOrNoLevelIndex(nextLevel);
         if (nextLevel >= WHAT_YES_OR_NO_LEVELS.length) {
           completeGame('what-yes-or-no');
         }
       }
+      // Replaying a cleared level: no XP/coin reward
     }
   };
 

@@ -346,14 +346,22 @@ export const RiyanStoryGame: React.FC<RiyanStoryGameProps> = ({ onBackToDashboar
 
   const handleLevelCompletion = () => {
     playSound(587.33, 0.6, 'sine');
-    addXp(50);
-    addCoins(5);
 
     const nextLevel = currentLevelIndex + 1;
     if (nextLevel < 5) {
+      // Award completion reward only if this is a new level (not replaying)
+      if (currentLevelIndex >= riyanStoryLevelIndex) {
+        addXp(50);
+        addCoins(5);
+      }
       setRiyanStoryLevelIndex(nextLevel);
       setCurrentSegmentIndex(0);
     } else {
+      // Award final level reward only on first-time completion
+      if (currentLevelIndex >= riyanStoryLevelIndex) {
+        addXp(50);
+        addCoins(5);
+      }
       completeGame('riyan-story');
       setRiyanStoryLevelIndex(5);
     }

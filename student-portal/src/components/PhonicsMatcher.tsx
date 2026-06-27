@@ -89,17 +89,19 @@ export const PhonicsMatcher: React.FC<PhonicsMatcherProps> = ({ onBackToDashboar
     } else {
       // Completed level!
       setLevelCleared(true);
-      addXp(50); // Level completion reward
-      addCoins(5);
 
-      // Save progress to Zustand store
+      // Save progress — only on FIRST-TIME completion
       const nextLevel = (selectedLevel ?? 0) + 1;
       if (selectedLevel === phonicsLevelIndex) {
+        // Award completion rewards only on first-time completion
+        addXp(50);
+        addCoins(5);
         setPhonicsLevelIndex(nextLevel);
         if (nextLevel >= PHONICS_MATCHER_LEVELS.length) {
           completeGame('phonics-matcher');
         }
       }
+      // Replaying a cleared level: no XP/coin reward
     }
   };
 

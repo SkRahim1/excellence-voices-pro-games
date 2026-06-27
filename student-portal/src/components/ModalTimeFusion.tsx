@@ -147,19 +147,19 @@ export const ModalTimeFusion: React.FC<ModalTimeFusionProps> = ({ onBackToDashbo
     } else {
       // Completed all 10 rounds
       setLevelCompleted(true);
-      
-      // Completion rewards
-      addXp(50);
-      addCoins(5);
 
-      // Unlock next level
+      // Unlock next level — only on FIRST-TIME completion
       const nextLevel = (selectedLevel ?? 0) + 1;
       if (selectedLevel === modalTimeFusionLevelIndex) {
+        // Award completion rewards only on first-time completion
+        addXp(50);
+        addCoins(5);
         setModalTimeFusionLevelIndex(nextLevel);
         if (nextLevel >= MODAL_TIME_FUSION_LEVELS.length) {
           completeGame('modal-time-fusion');
         }
       }
+      // Replaying a cleared level: no XP/coin reward
     }
   };
 

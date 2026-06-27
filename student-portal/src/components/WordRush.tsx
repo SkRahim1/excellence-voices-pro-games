@@ -102,17 +102,19 @@ export const WordRush: React.FC<WordRushProps> = ({ onBackToDashboard }) => {
     } else {
       // Completed level!
       setLevelCleared(true);
-      addXp(50); // Completion rewards
-      addCoins(5);
 
-      // Save progress to Zustand store
+      // Save progress — only on FIRST-TIME completion
       const nextLevel = (selectedLevel ?? 0) + 1;
       if (selectedLevel === wordRushLevelIndex) {
+        // Award completion rewards only on first-time completion
+        addXp(50);
+        addCoins(5);
         setWordRushLevelIndex(nextLevel);
         if (nextLevel >= WORD_RUSH_LEVELS.length) {
           completeGame('word-rush');
         }
       }
+      // Replaying a cleared level: no XP/coin reward
     }
   };
 
