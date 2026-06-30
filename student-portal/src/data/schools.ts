@@ -14,7 +14,7 @@ export const SCHOOL_MAPPING: Record<string, string> = {
   'exscl-13': 'Sri Vaagdevi School -2',
   'exscl-14': 'Vashistha School,Indresham',
   'exscl-15': 'Vashistha School',
-  'exscl-16': 'Excellence School 16',
+  'exscl-16': 'Bhargavi Vidya Niketan School',
   'exscl-17': 'Excellence School 17',
   'exscl-18': 'Excellence School 18',
 };
