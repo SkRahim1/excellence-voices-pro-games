@@ -35,7 +35,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     speakScoreHighScore,
     idiomMatchLevelIndex,
     timeTransformerLevelIndex,
-    actionWordsLevelIndex
+    actionWordsLevelIndex,
+    partsOfSpeechLevelIndex
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -46,24 +47,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   const [showNewGamesPopup, setShowNewGamesPopup] = useState<boolean>(false);
 
   const isNewGame = (gameId: string): boolean => {
-    const newGameIds = ['speak-score', 'idiom-match', 'time-transformer', 'action-words'];
+    const newGameIds = ['action-words', 'parts-of-speech'];
     if (!newGameIds.includes(gameId)) return false;
     
-    // 7 days from release date (2026-06-26)
-    const releaseDate = new Date('2026-06-26T00:00:00').getTime();
+    // 3 days from release date (2026-07-06)
+    const releaseDate = new Date('2026-07-06T00:00:00').getTime();
     const currentDate = new Date().getTime();
     const diffDays = (currentDate - releaseDate) / (1000 * 60 * 60 * 24);
     
-    return diffDays >= 0 && diffDays <= 7;
+    return diffDays >= 0 && diffDays <= 3;
   };
 
   useEffect(() => {
-    const releaseDate = new Date('2026-06-26T00:00:00').getTime();
+    const releaseDate = new Date('2026-07-06T00:00:00').getTime();
     const currentDate = new Date().getTime();
     const diffDays = (currentDate - releaseDate) / (1000 * 60 * 60 * 24);
     
-    if (diffDays >= 0 && diffDays <= 5) {
-      const dismissed = localStorage.getItem('excellence-voices-new-games-popup-dismissed');
+    if (diffDays >= 0 && diffDays <= 3) {
+      const dismissed = localStorage.getItem('excellence-voices-new-games-popup-dismissed-2026-07-06');
       if (!dismissed) {
         setShowNewGamesPopup(true);
       }
@@ -71,12 +72,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   }, []);
 
   const handleDismissPopup = () => {
-    localStorage.setItem('excellence-voices-new-games-popup-dismissed', 'true');
+    localStorage.setItem('excellence-voices-new-games-popup-dismissed-2026-07-06', 'true');
     setShowNewGamesPopup(false);
   };
 
   const handlePlayGameFromPopup = (gameId: string) => {
-    localStorage.setItem('excellence-voices-new-games-popup-dismissed', 'true');
+    localStorage.setItem('excellence-voices-new-games-popup-dismissed-2026-07-06', 'true');
     setShowNewGamesPopup(false);
     onSelectGame(gameId);
   };
@@ -368,6 +369,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       difficulty: 'Easy / Medium',
       xpReward: 120,
       iconColor: 'from-purple-500 to-indigo-600',
+    },
+    {
+      id: 'parts-of-speech',
+      title: 'Parts of Speech Master 📝',
+      desc: 'Master Nouns, Pronouns, Verbs, Adjectives, Adverbs, Prepositions, Conjunctions, and Interjections. Clear all 8 modules to unlock the Master Challenge!',
+      duration: '60 Mins',
+      difficulty: 'Medium',
+      xpReward: 120,
+      iconColor: 'from-cyan-500 to-blue-600',
     },
   ];
 
@@ -717,7 +727,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                     fontSize: '1.5rem',
                     color: 'white'
                   }}>
-                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : game.id === 'speak-score' ? '🎤' : game.id === 'idiom-match' ? '🧩' : game.id === 'time-transformer' ? '🔮' : game.id === 'action-words' ? '🗣️' : '🔊'}
+                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : game.id === 'speak-score' ? '🎤' : game.id === 'idiom-match' ? '🧩' : game.id === 'time-transformer' ? '🔮' : game.id === 'action-words' ? '🗣️' : game.id === 'parts-of-speech' ? '📝' : '🔊'}
                   </div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -932,6 +942,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                         </div>
                       </div>
                     )}
+
+                    {game.id === 'parts-of-speech' && partsOfSpeechLevelIndex > 0 && partsOfSpeechLevelIndex < 9 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 700 }}>
+                          <span>Module Progress</span>
+                          <span>Module {partsOfSpeechLevelIndex} of 8 ({Math.round((partsOfSpeechLevelIndex / 8) * 100)}%)</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(partsOfSpeechLevelIndex / 8) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -945,7 +967,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                   (game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5) ||
                   (game.id === 'idiom-match' && idiomMatchLevelIndex > 0 && idiomMatchLevelIndex < 10) ||
                   (game.id === 'time-transformer' && timeTransformerLevelIndex > 0 && timeTransformerLevelIndex < 11) ||
-                  (game.id === 'action-words' && actionWordsLevelIndex > 0 && actionWordsLevelIndex < 20)) && !isCompleted ? (
+                  (game.id === 'action-words' && actionWordsLevelIndex > 0 && actionWordsLevelIndex < 20) ||
+                  (game.id === 'parts-of-speech' && partsOfSpeechLevelIndex > 0 && partsOfSpeechLevelIndex < 9)) && !isCompleted ? (
                   <button className="game-card-resume-btn">
                     <Play style={{ width: '14px', height: '14px', fill: 'currentColor' }} />
                     Resume
@@ -1045,20 +1068,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                 letterSpacing: '0.05em',
                 marginBottom: '0.5rem'
               }}>
-                🎉 Update Released!
+                🎉 New Games Released!
               </div>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, background: 'linear-gradient(to right, #06b6d4, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Three New English Games!
+                Two Brand-New Games!
               </h2>
               <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.4rem' }}>
-                We have added three brand-new interactive speaking and match games to help you build confidence and master English!
+                We have added two brand-new speaking and grammar challenge games to help you build confidence and master English!
               </p>
             </div>
 
             {/* Games Showcase */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               
-              {/* Game 1: Speak & Score */}
+              {/* Game 1: Action Words & Forms */}
               <div style={{
                 background: 'rgba(255, 255, 255, 0.03)',
                 border: '1px solid rgba(255, 255, 255, 0.06)',
@@ -1071,76 +1094,47 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                 transition: 'all 0.2s'
               }} 
               className="hover-lift"
-              onClick={() => handlePlayGameFromPopup('speak-score')}
-              >
-                <div style={{ fontSize: '2rem', background: 'rgba(16, 185, 129, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', flexShrink: 0 }}>
-                  🎤
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Speak & Score
-                    <span style={{ fontSize: '0.65rem', background: '#10b981', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
-                  </h4>
-                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
-                    Practice reading sentences aloud and get immediate AI evaluation on your Accuracy, Pronunciation, and Fluency!
-                  </p>
-                </div>
-              </div>
-
-              {/* Game 2: Idiom Match */}
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                borderRadius: '16px',
-                padding: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }} 
-              className="hover-lift"
-              onClick={() => handlePlayGameFromPopup('idiom-match')}
-              >
-                <div style={{ fontSize: '2rem', background: 'rgba(245, 158, 11, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', flexShrink: 0 }}>
-                  🧩
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Idiom Match
-                    <span style={{ fontSize: '0.65rem', background: '#f59e0b', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
-                  </h4>
-                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
-                    Learn 50+ common English idioms with voice guidelines, then test your knowledge with interactive matching puzzles.
-                  </p>
-                </div>
-              </div>
-
-              {/* Game 3: Time Expression Transformer */}
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                borderRadius: '16px',
-                padding: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }} 
-              className="hover-lift"
-              onClick={() => handlePlayGameFromPopup('time-transformer')}
+              onClick={() => handlePlayGameFromPopup('action-words')}
               >
                 <div style={{ fontSize: '2rem', background: 'rgba(168, 85, 247, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a855f7', flexShrink: 0 }}>
-                  🔮
+                  🗣️
                 </div>
                 <div style={{ flex: 1 }}>
                   <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Time Expression Transformer
+                    Action Words & Forms
                     <span style={{ fontSize: '0.65rem', background: '#a855f7', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
                   </h4>
                   <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
-                    Transform base simple present sentences to match advanced time expressions in 11 progressive speech challenges!
+                    Master 5 forms (V1-V5) of 200 high-frequency action words. Study context sentences and speak all five forms in order!
+                  </p>
+                </div>
+              </div>
+
+              {/* Game 2: Parts of Speech Master */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '16px',
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }} 
+              className="hover-lift"
+              onClick={() => handlePlayGameFromPopup('parts-of-speech')}
+              >
+                <div style={{ fontSize: '2rem', background: 'rgba(6, 182, 212, 0.1)', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06b6d4', flexShrink: 0 }}>
+                  📝
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    Parts of Speech Master
+                    <span style={{ fontSize: '0.65rem', background: '#06b6d4', color: 'white', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>NEW</span>
+                  </h4>
+                  <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: '0.2rem 0 0 0', lineHeight: '1.3' }}>
+                    Learn Nouns, Pronouns, Verbs, Adjectives, Adverbs, Prepositions, Conjunctions, and Interjections. Clear all 8 modules to conquer the Master Challenge!
                   </p>
                 </div>
               </div>

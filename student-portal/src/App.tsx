@@ -22,6 +22,7 @@ import { SettingsModal } from './components/SettingsModal';
 import { useSpeech } from './hooks/useSpeech';
 import { AdminPortal } from './components/AdminPortal';
 import { ActionWordsWithForms } from './components/ActionWordsWithForms';
+import { PartsOfSpeech } from './components/PartsOfSpeech';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(() => {
@@ -215,6 +216,10 @@ function App() {
 
           {selectedGame === 'action-words' && (
             <ActionWordsWithForms onBackToDashboard={() => handleGameSelectState(null)} />
+          )}
+
+          {selectedGame === 'parts-of-speech' && (
+            <PartsOfSpeech onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {(selectedGame === 'view-certificate' || selectedGame?.startsWith('view-certificate-')) && (() => {

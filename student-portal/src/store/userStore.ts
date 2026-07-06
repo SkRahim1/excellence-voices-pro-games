@@ -41,6 +41,7 @@ interface UserState {
   idiomMatchLevelIndex: number;
   timeTransformerLevelIndex: number;
   actionWordsLevelIndex: number;
+  partsOfSpeechLevelIndex: number;
   
   
   addXp: (amount: number) => void;
@@ -64,6 +65,7 @@ interface UserState {
   setIdiomMatchLevelIndex: (levelIndex: number) => void;
   setTimeTransformerLevelIndex: (levelIndex: number) => void;
   setActionWordsLevelIndex: (levelIndex: number) => void;
+  setPartsOfSpeechLevelIndex: (levelIndex: number) => void;
   registerStudent: (details: { name: string; grade: string; school: string; mobileNumber: string }) => void;
   loginStudent: (mobileNumber: string) => Promise<boolean>;
   tickActiveTime: (seconds: number) => void;
@@ -117,6 +119,7 @@ export const useUserStore = create<UserState>()(
         idiomMatchLevelIndex: 0,
         timeTransformerLevelIndex: 0,
         actionWordsLevelIndex: 0,
+        partsOfSpeechLevelIndex: 0,
 
         addXp: (amount) =>
           set((state) => {
@@ -254,6 +257,11 @@ export const useUserStore = create<UserState>()(
             syncStoreToCloud({ actionWordsLevelIndex: levelIndex });
             return { actionWordsLevelIndex: levelIndex };
           }),
+        setPartsOfSpeechLevelIndex: (levelIndex) =>
+          set(() => {
+            syncStoreToCloud({ partsOfSpeechLevelIndex: levelIndex });
+            return { partsOfSpeechLevelIndex: levelIndex };
+          }),
         registerStudent: (details) => {
           const studentData = {
             name: details.name,
@@ -283,6 +291,7 @@ export const useUserStore = create<UserState>()(
             idiomMatchLevelIndex: 0,
             timeTransformerLevelIndex: 0,
             actionWordsLevelIndex: 0,
+            partsOfSpeechLevelIndex: 0,
           };
 
           set(() => studentData);
@@ -331,6 +340,7 @@ export const useUserStore = create<UserState>()(
                 idiomMatchLevelIndex: data.idiomMatchLevelIndex ?? 0,
                 timeTransformerLevelIndex: data.timeTransformerLevelIndex ?? 0,
                 actionWordsLevelIndex: data.actionWordsLevelIndex ?? 0,
+                partsOfSpeechLevelIndex: data.partsOfSpeechLevelIndex ?? 0,
               }));
               return true;
             }
@@ -419,6 +429,7 @@ export const useUserStore = create<UserState>()(
               idiomMatchLevelIndex: 0,
               timeTransformerLevelIndex: 0,
               actionWordsLevelIndex: 0,
+              partsOfSpeechLevelIndex: 0,
             }).catch((err) => console.error('Cloud reset failed:', err));
           }
 
@@ -451,6 +462,7 @@ export const useUserStore = create<UserState>()(
             idiomMatchLevelIndex: 0,
             timeTransformerLevelIndex: 0,
             actionWordsLevelIndex: 0,
+            partsOfSpeechLevelIndex: 0,
           }));
         },
         logout: () => {
@@ -482,6 +494,7 @@ export const useUserStore = create<UserState>()(
             idiomMatchLevelIndex: 0,
             timeTransformerLevelIndex: 0,
             actionWordsLevelIndex: 0,
+            partsOfSpeechLevelIndex: 0,
           }));
         },
       };
