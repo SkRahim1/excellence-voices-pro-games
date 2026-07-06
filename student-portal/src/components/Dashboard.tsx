@@ -34,7 +34,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     riyanStoryLevelIndex,
     speakScoreHighScore,
     idiomMatchLevelIndex,
-    timeTransformerLevelIndex
+    timeTransformerLevelIndex,
+    actionWordsLevelIndex
   } = useUserStore();
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
@@ -45,7 +46,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   const [showNewGamesPopup, setShowNewGamesPopup] = useState<boolean>(false);
 
   const isNewGame = (gameId: string): boolean => {
-    const newGameIds = ['speak-score', 'idiom-match', 'time-transformer'];
+    const newGameIds = ['speak-score', 'idiom-match', 'time-transformer', 'action-words'];
     if (!newGameIds.includes(gameId)) return false;
     
     // 7 days from release date (2026-06-26)
@@ -358,6 +359,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       difficulty: 'Difficult',
       xpReward: 120,
       iconColor: 'from-fuchsia-600 to-pink-600',
+    },
+    {
+      id: 'action-words',
+      title: 'Action Words & Forms 🗣️',
+      desc: 'Master base verbs, past simple, participle, continuous, and future tenses. Listen to sentences, and speak all five forms in order.',
+      duration: '60 Mins',
+      difficulty: 'Easy / Medium',
+      xpReward: 120,
+      iconColor: 'from-purple-500 to-indigo-600',
     },
   ];
 
@@ -707,7 +717,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                     fontSize: '1.5rem',
                     color: 'white'
                   }}>
-                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : game.id === 'speak-score' ? '🎤' : game.id === 'idiom-match' ? '🧩' : game.id === 'time-transformer' ? '🔮' : '🔊'}
+                    {game.id === 'grammar-galaxy' ? '🌌' : game.id === 'word-rush' ? '⚡' : game.id === 'phrasal-verbs' ? '🗺️' : game.id === 'modal-mind' ? '🧠' : game.id === 'what-yes-or-no' ? '💬' : game.id === 'modal-time-fusion' ? '🔮' : game.id === 'english-chess' ? '♟️' : game.id === 'escape-room' ? '🔐' : game.id === 'speak-score' ? '🎤' : game.id === 'idiom-match' ? '🧩' : game.id === 'time-transformer' ? '🔮' : game.id === 'action-words' ? '🗣️' : '🔊'}
                   </div>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -910,6 +920,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                         </div>
                       </div>
                     )}
+
+                    {game.id === 'action-words' && actionWordsLevelIndex > 0 && actionWordsLevelIndex < 20 && (
+                      <div style={{ marginTop: '0.75rem', width: '100%', maxWidth: '300px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 700 }}>
+                          <span>Level Progress</span>
+                          <span>Level {actionWordsLevelIndex + 1} of 20 ({Math.round((actionWordsLevelIndex / 20) * 100)}%)</span>
+                        </div>
+                        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(actionWordsLevelIndex / 20) * 100}%`, height: '100%', background: 'var(--accent-gradient)' }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -922,7 +944,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                   (game.id === 'modal-time-fusion' && modalTimeFusionLevelIndex > 0) ||
                   (game.id === 'riyan-story' && riyanStoryLevelIndex > 0 && riyanStoryLevelIndex < 5) ||
                   (game.id === 'idiom-match' && idiomMatchLevelIndex > 0 && idiomMatchLevelIndex < 10) ||
-                  (game.id === 'time-transformer' && timeTransformerLevelIndex > 0 && timeTransformerLevelIndex < 11)) && !isCompleted ? (
+                  (game.id === 'time-transformer' && timeTransformerLevelIndex > 0 && timeTransformerLevelIndex < 11) ||
+                  (game.id === 'action-words' && actionWordsLevelIndex > 0 && actionWordsLevelIndex < 20)) && !isCompleted ? (
                   <button className="game-card-resume-btn">
                     <Play style={{ width: '14px', height: '14px', fill: 'currentColor' }} />
                     Resume

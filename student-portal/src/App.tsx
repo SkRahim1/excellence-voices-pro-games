@@ -21,6 +21,7 @@ import { HelpModal } from './components/HelpModal';
 import { SettingsModal } from './components/SettingsModal';
 import { useSpeech } from './hooks/useSpeech';
 import { AdminPortal } from './components/AdminPortal';
+import { ActionWordsWithForms } from './components/ActionWordsWithForms';
 
 function App() {
   const [isAdminMode, setIsAdminMode] = useState(() => {
@@ -210,6 +211,10 @@ function App() {
 
           {selectedGame === 'time-transformer' && (
             <TimeTransformer onBackToDashboard={() => handleGameSelectState(null)} />
+          )}
+
+          {selectedGame === 'action-words' && (
+            <ActionWordsWithForms onBackToDashboard={() => handleGameSelectState(null)} />
           )}
 
           {(selectedGame === 'view-certificate' || selectedGame?.startsWith('view-certificate-')) && (() => {

@@ -40,6 +40,8 @@ interface UserState {
   speakScoreHighScore: number;
   idiomMatchLevelIndex: number;
   timeTransformerLevelIndex: number;
+  actionWordsLevelIndex: number;
+  
   
   addXp: (amount: number) => void;
   addCoins: (amount: number) => void;
@@ -61,6 +63,7 @@ interface UserState {
   setSpeakScoreHighScore: (score: number) => void;
   setIdiomMatchLevelIndex: (levelIndex: number) => void;
   setTimeTransformerLevelIndex: (levelIndex: number) => void;
+  setActionWordsLevelIndex: (levelIndex: number) => void;
   registerStudent: (details: { name: string; grade: string; school: string; mobileNumber: string }) => void;
   loginStudent: (mobileNumber: string) => Promise<boolean>;
   tickActiveTime: (seconds: number) => void;
@@ -113,6 +116,7 @@ export const useUserStore = create<UserState>()(
         speakScoreHighScore: 0,
         idiomMatchLevelIndex: 0,
         timeTransformerLevelIndex: 0,
+        actionWordsLevelIndex: 0,
 
         addXp: (amount) =>
           set((state) => {
@@ -245,6 +249,11 @@ export const useUserStore = create<UserState>()(
             syncStoreToCloud({ timeTransformerLevelIndex: levelIndex });
             return { timeTransformerLevelIndex: levelIndex };
           }),
+        setActionWordsLevelIndex: (levelIndex) =>
+          set(() => {
+            syncStoreToCloud({ actionWordsLevelIndex: levelIndex });
+            return { actionWordsLevelIndex: levelIndex };
+          }),
         registerStudent: (details) => {
           const studentData = {
             name: details.name,
@@ -273,6 +282,7 @@ export const useUserStore = create<UserState>()(
             speakScoreHighScore: 0,
             idiomMatchLevelIndex: 0,
             timeTransformerLevelIndex: 0,
+            actionWordsLevelIndex: 0,
           };
 
           set(() => studentData);
@@ -320,6 +330,7 @@ export const useUserStore = create<UserState>()(
                 speakScoreHighScore: data.speakScoreHighScore ?? 0,
                 idiomMatchLevelIndex: data.idiomMatchLevelIndex ?? 0,
                 timeTransformerLevelIndex: data.timeTransformerLevelIndex ?? 0,
+                actionWordsLevelIndex: data.actionWordsLevelIndex ?? 0,
               }));
               return true;
             }
@@ -407,6 +418,7 @@ export const useUserStore = create<UserState>()(
               speakScoreHighScore: 0,
               idiomMatchLevelIndex: 0,
               timeTransformerLevelIndex: 0,
+              actionWordsLevelIndex: 0,
             }).catch((err) => console.error('Cloud reset failed:', err));
           }
 
@@ -438,6 +450,7 @@ export const useUserStore = create<UserState>()(
             speakScoreHighScore: 0,
             idiomMatchLevelIndex: 0,
             timeTransformerLevelIndex: 0,
+            actionWordsLevelIndex: 0,
           }));
         },
         logout: () => {
@@ -468,6 +481,7 @@ export const useUserStore = create<UserState>()(
             speakScoreHighScore: 0,
             idiomMatchLevelIndex: 0,
             timeTransformerLevelIndex: 0,
+            actionWordsLevelIndex: 0,
           }));
         },
       };
