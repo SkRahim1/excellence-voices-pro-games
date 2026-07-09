@@ -132,7 +132,7 @@ export const PartsOfSpeech: React.FC<PartsOfSpeechProps> = ({ onBackToDashboard 
           coinGain = 5;
         } else {
           // Already completed, just review rewards
-          xpGain = 10; 
+          xpGain = 0; 
         }
       }
 
@@ -160,7 +160,7 @@ export const PartsOfSpeech: React.FC<PartsOfSpeechProps> = ({ onBackToDashboard 
           xpGain = 100;
           coinGain = 10;
         } else {
-          xpGain = 20;
+          xpGain = 0;
         }
       }
 

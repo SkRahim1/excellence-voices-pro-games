@@ -162,8 +162,10 @@ export const EscapeRoomEnglish: React.FC<EscapeRoomEnglishProps> = ({ onBackToDa
       setStars(prev => prev + starBonus);
 
       // Award small immediate XP
-      addXp(5);
-      addCoins(1);
+      if (escapeRoomHighScore === 0) {
+        addXp(5);
+        addCoins(1);
+      }
 
       // Record room 5 discovery code digit
       if (currentRoom === 5 && activeChallenge.digitClue) {
@@ -230,8 +232,10 @@ export const EscapeRoomEnglish: React.FC<EscapeRoomEnglishProps> = ({ onBackToDa
     setInventory(prev => [...prev, keyAcquired]);
 
     // Small bonus reward per room completion
-    addXp(20);
-    addCoins(2);
+    if (escapeRoomHighScore === 0) {
+      addXp(20);
+      addCoins(2);
+    }
 
     if (currentRoom < 5) {
       setTransitionMsg(`You unlocked the ${roomMeta.name}! Moving to Room ${currentRoom + 1}...`);
@@ -262,8 +266,10 @@ export const EscapeRoomEnglish: React.FC<EscapeRoomEnglishProps> = ({ onBackToDa
         const finalScore = stars * 10 - Math.floor(timeElapsed / 15);
         const activeScore = finalScore > 0 ? finalScore : 50;
 
-        addXp(50);
-        addCoins(5);
+        if (escapeRoomHighScore === 0) {
+          addXp(50);
+          addCoins(5);
+        }
         setEscapeRoomHighScore(activeScore);
 
         setGameState('escaped');

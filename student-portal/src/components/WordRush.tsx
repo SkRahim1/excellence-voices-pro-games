@@ -86,8 +86,10 @@ export const WordRush: React.FC<WordRushProps> = ({ onBackToDashboard }) => {
       const pointsEarned = Math.round(basePoints * multiplier);
       
       setCombo(prev => prev + 1);
-      addXp(pointsEarned);
-      addCoins(1);
+      if (selectedLevel === wordRushLevelIndex) {
+        addXp(pointsEarned);
+        addCoins(1);
+      }
     } else {
       setCombo(0);
     }

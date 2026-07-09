@@ -76,8 +76,10 @@ export const PhonicsMatcher: React.FC<PhonicsMatcherProps> = ({ onBackToDashboar
     setChecked(true);
 
     if (option === round.answer) {
-      addXp(15);
-      addCoins(1);
+      if (selectedLevel === phonicsLevelIndex) {
+        addXp(15);
+        addCoins(1);
+      }
     }
   };
 

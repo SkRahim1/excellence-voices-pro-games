@@ -395,13 +395,15 @@ export const TimeTransformer: React.FC<TimeTransformerProps> = ({ onBackToDashbo
   const handleLevelCleared = () => {
     if (!selectedLevel) return;
 
-    let xpGain = 100;
-    let coinGain = 3;
+    let xpGain = 0;
+    let coinGain = 0;
     let isFirst = false;
 
     if (selectedLevel.levelNumber === timeTransformerLevelIndex + 1) {
       setTimeTransformerLevelIndex(selectedLevel.levelNumber);
       isFirst = true;
+      xpGain = 100;
+      coinGain = 3;
     }
 
     setRewardsEarned({
@@ -410,8 +412,8 @@ export const TimeTransformer: React.FC<TimeTransformerProps> = ({ onBackToDashbo
       isFirstCompletion: isFirst
     });
 
-    addXp(xpGain);
-    addCoins(coinGain);
+    if (xpGain > 0) addXp(xpGain);
+    if (coinGain > 0) addCoins(coinGain);
     completeGame('time-transformer');
     setActiveScreen('complete');
   };

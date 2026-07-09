@@ -353,7 +353,13 @@ export const SpeakScore: React.FC<SpeakScoreProps> = ({ onBackToDashboard }) => 
     let coinGain = 0;
     let newHigh = false;
 
-    if (overall >= 70) {
+    // High Score tracking
+    if (overall > speakScoreHighScore) {
+      setSpeakScoreHighScore(overall);
+      newHigh = true;
+    }
+
+    if (overall >= 70 && (newHigh || speakScoreHighScore === 0)) {
       // Scaled reward based on sentence complexity
       xpGain = activeSentence.xpReward;
       if (overall >= 90) {
@@ -364,12 +370,6 @@ export const SpeakScore: React.FC<SpeakScoreProps> = ({ onBackToDashboard }) => 
       } else {
         coinGain = 1;
       }
-    }
-
-    // High Score tracking
-    if (overall > speakScoreHighScore) {
-      setSpeakScoreHighScore(overall);
-      newHigh = true;
     }
 
     // Update state to render results

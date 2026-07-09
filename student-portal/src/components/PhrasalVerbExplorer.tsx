@@ -85,8 +85,10 @@ export const PhrasalVerbExplorer: React.FC<PhrasalVerbExplorerProps> = ({ onBack
 
     if (answerCorrect) {
       setScore(prev => prev + 20);
-      addXp(20);
-      addCoins(2);
+      if (selectedLevel === phrasalVerbLevelIndex) {
+        addXp(20);
+        addCoins(2);
+      }
       
       // Narrate the correct sentence with answer
       const completedSentence = activeVerb.quizDialogue.replace("______", activeVerb.answer);

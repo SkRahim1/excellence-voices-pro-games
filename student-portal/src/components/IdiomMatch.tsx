@@ -192,18 +192,18 @@ export const IdiomMatch: React.FC<IdiomMatchProps> = ({ onBackToDashboard }) => 
       if (selectedLevel.levelNumber === idiomMatchLevelIndex + 1) {
         setIdiomMatchLevelIndex(selectedLevel.levelNumber);
         isFirst = true;
-      }
-      
-      // Award rewards
-      if (score === 5) {
-        xpGain = 120; // Max XP
-        coinGain = 4; // Bonus coin
-      } else if (score === 4) {
-        xpGain = 100;
-        coinGain = 2;
-      } else {
-        xpGain = 80;
-        coinGain = 1;
+
+        // Award rewards ONLY on first completion
+        if (score === 5) {
+          xpGain = 120; // Max XP
+          coinGain = 4; // Bonus coin
+        } else if (score === 4) {
+          xpGain = 100;
+          coinGain = 2;
+        } else {
+          xpGain = 80;
+          coinGain = 1;
+        }
       }
     }
 

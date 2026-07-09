@@ -290,9 +290,11 @@ export const ActionWordsWithForms: React.FC<ActionWordsWithFormsProps> = ({ onBa
     // Award XP based on correct forms spoken
     const correctCount = results.filter(Boolean).length;
     if (correctCount > 0) {
-      addXp(correctCount * 3); // 3 XP per correct form spoken
-      if (correctCount === 5) {
-        addCoins(1); // 1 bonus coin for perfect pronunciation
+      if (selectedLevel && selectedLevel.levelNumber === actionWordsLevelIndex + 1) {
+        addXp(correctCount * 3); // 3 XP per correct form spoken
+        if (correctCount === 5) {
+          addCoins(1); // 1 bonus coin for perfect pronunciation
+        }
       }
     }
   };

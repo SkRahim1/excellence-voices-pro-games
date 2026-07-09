@@ -113,8 +113,10 @@ export const WhatYesOrNo: React.FC<WhatYesOrNoProps> = ({ onBackToDashboard }) =
 
     if (isAnsCorrect) {
       setScore(prev => prev + 20);
-      addXp(20);
-      addCoins(2);
+      if (selectedLevel === whatYesOrNoLevelIndex) {
+        addXp(20);
+        addCoins(2);
+      }
       speakQuizCompletedSentence();
     } else {
       speak("Oops, incorrect! Let's read the tutor tip.");

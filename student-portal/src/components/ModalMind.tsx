@@ -91,8 +91,10 @@ export const ModalMind: React.FC<ModalMindProps> = ({ onBackToDashboard }) => {
 
     if (answerCorrect) {
       setScore(prev => prev + 20);
-      addXp(20);
-      addCoins(2);
+      if (selectedLevel === modalLevelIndex) {
+        addXp(20);
+        addCoins(2);
+      }
       
       // Narrate the correct sentence with answer
       const completedSentence = activeQuizQuestion.quizDialogue.replace("______", activeQuizQuestion.answer);

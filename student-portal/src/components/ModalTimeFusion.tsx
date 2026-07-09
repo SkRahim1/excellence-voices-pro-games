@@ -128,8 +128,10 @@ export const ModalTimeFusion: React.FC<ModalTimeFusionProps> = ({ onBackToDashbo
 
     if (isAnsCorrect) {
       setScore(prev => prev + 10);
-      addXp(15);
-      addCoins(1);
+      if (selectedLevel === modalTimeFusionLevelIndex) {
+        addXp(15);
+        addCoins(1);
+      }
       speakQuizCompletedSentence();
     } else {
       speak("That is incorrect. Look at the tutor explanation below.");

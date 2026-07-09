@@ -303,8 +303,10 @@ export const RiyanStoryGame: React.FC<RiyanStoryGameProps> = ({ onBackToDashboar
       });
 
       // Award XP and Coins
-      addXp(5);
-      addCoins(1);
+      if (currentLevelIndex >= riyanStoryLevelIndex) {
+        addXp(5);
+        addCoins(1);
+      }
 
       // Trigger exit cutscene after a small delay
       setTimeout(() => {

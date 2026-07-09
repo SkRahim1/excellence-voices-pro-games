@@ -125,8 +125,10 @@ export const GrammarGalaxy: React.FC<GrammarGalaxyProps> = ({ onBackToDashboard 
     setChecked(true);
 
     if (isAnswerCorrect) {
-      addXp(15);
-      addCoins(1);
+      if (selectedLevel === grammarGalaxyLevelIndex) {
+        addXp(15);
+        addCoins(1);
+      }
       speak(draft.join(' '));
     } else {
       // Find if student used any distractor words
