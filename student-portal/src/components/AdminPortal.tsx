@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   School, 
-  Award, 
   Trophy, 
   Download, 
   Search, 
   LogOut, 
   Lock, 
   Key, 
-  AlertCircle 
+  AlertCircle,
+  MessageSquare,
+  Star,
+  RefreshCw,
+  CheckCircle2,
+  ShieldAlert
 } from 'lucide-react';
 import { db, isFirebaseEnabled } from '../firebase/config';
-import { collection, doc, getDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, orderBy, writeBatch } from 'firebase/firestore';
 import { SCHOOL_MAPPING, getSchoolName } from '../data/schools';
 
 interface StudentData {
@@ -27,6 +31,19 @@ interface StudentData {
   dailyActiveSeconds?: number;
 }
 
+interface SurveyData {
+  id?: string;
+  studentName: string;
+  mobileNumber: string;
+  school: string;
+  grade: string;
+  rating: number;
+  favoriteGame: string;
+  feedbackText: string;
+  fairnessAgreed: boolean;
+  submittedAt: string;
+}
+
 export const AdminPortal: React.FC = () => {
   // Login State
   const [passcode, setPasscode] = useState('');
@@ -36,14 +53,18 @@ export const AdminPortal: React.FC = () => {
   
   // Data State
   const [students, setStudents] = useState<StudentData[]>([]);
+  const [surveys, setSurveys] = useState<SurveyData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'schools' | 'students'>('overview');
+  const [surveysLoading, setSurveysLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'schools' | 'students' | 'surveys'>('overview');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // Search/Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [schoolFilter, setSchoolFilter] = useState('all');
   const [gradeFilter, setGradeFilter] = useState('all');
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
+  const [batchResetStatus, setBatchResetStatus] = useState<{ running: boolean; message: string }>({ running: false, message: '' });
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -77,18 +98,18 @@ export const AdminPortal: React.FC = () => {
   // Fetch all students
   const fetchStudentsData = async () => {
     if (!isFirebaseEnabled || !db) {
-      // Fallback local mock data for admin dashboard testing
+      // Fallback local mock data for admin dashboard testing (all zeroed out after fairness reset)
       const mockStudents: StudentData[] = [
-        { name: 'Aditya Kumar', grade: 'Grade 8', school: 'exscl-01', mobileNumber: '9876543211', xp: 4500, coins: 140, streak: 8, completedGames: ['word-rush', 'grammar-galaxy'] },
-        { name: 'Sneha Patel', grade: 'Grade 7', school: 'exscl-02', mobileNumber: '9123456780', xp: 3800, coins: 90, streak: 5, completedGames: ['grammar-galaxy'] },
-        { name: 'Vikram Singh', grade: 'Grade 9', school: 'exscl-05', mobileNumber: '9988776655', xp: 3500, coins: 110, streak: 6, completedGames: ['escape-room'] },
-        { name: 'Priya Sharma', grade: 'Grade 6', school: 'exscl-03', mobileNumber: '9000111222', xp: 3200, coins: 85, streak: 4, completedGames: ['phonics-matcher'] },
-        { name: 'Rahul Verma', grade: 'Grade 8', school: 'exscl-06', mobileNumber: '9440055661', xp: 2900, coins: 70, streak: 3, completedGames: [] },
-        { name: 'Ananya Rao', grade: 'Grade 7', school: 'exscl-01', mobileNumber: '9550011223', xp: 2700, coins: 65, streak: 3, completedGames: ['word-rush'] },
-        { name: 'Karan Malhotra', grade: 'Grade 9', school: 'exscl-04', mobileNumber: '9661122334', xp: 2500, coins: 60, streak: 2, completedGames: ['english-chess'] },
-        { name: 'Tanvi Joshi', grade: 'Grade 6', school: 'exscl-07', mobileNumber: '9772233445', xp: 2300, coins: 55, streak: 2, completedGames: [] },
-        { name: 'Kunal Deshmukh', grade: 'Grade 8', school: 'exscl-08', mobileNumber: '9883344556', xp: 2100, coins: 50, streak: 1, completedGames: [] },
-        { name: 'Riddhi Sen', grade: 'Grade 7', school: 'exscl-09', mobileNumber: '9994455667', xp: 2000, coins: 45, streak: 1, completedGames: [] }
+        { name: 'Aditya Kumar', grade: 'Grade 8', school: 'exscl-01', mobileNumber: '9876543211', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Sneha Patel', grade: 'Grade 7', school: 'exscl-02', mobileNumber: '9123456780', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Vikram Singh', grade: 'Grade 9', school: 'exscl-05', mobileNumber: '9988776655', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Priya Sharma', grade: 'Grade 6', school: 'exscl-03', mobileNumber: '9000111222', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Rahul Verma', grade: 'Grade 8', school: 'exscl-06', mobileNumber: '9440055661', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Ananya Rao', grade: 'Grade 7', school: 'exscl-01', mobileNumber: '9550011223', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Karan Malhotra', grade: 'Grade 9', school: 'exscl-04', mobileNumber: '9661122334', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Tanvi Joshi', grade: 'Grade 6', school: 'exscl-07', mobileNumber: '9772233445', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Kunal Deshmukh', grade: 'Grade 8', school: 'exscl-08', mobileNumber: '9883344556', xp: 0, coins: 0, streak: 1, completedGames: [] },
+        { name: 'Riddhi Sen', grade: 'Grade 7', school: 'exscl-09', mobileNumber: '9994455667', xp: 0, coins: 0, streak: 1, completedGames: [] }
       ];
       setStudents(mockStudents);
       return;
@@ -101,14 +122,15 @@ export const AdminPortal: React.FC = () => {
       const list: StudentData[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        const isResetDone = data.hasSeenFairnessResetV1 ?? false;
         list.push({
           name: data.name || 'Anonymous',
           grade: data.grade || 'Grade 7',
           school: data.school || 'exscl-01',
           mobileNumber: data.mobileNumber || doc.id,
-          xp: data.xp || 0,
-          coins: data.coins || 0,
-          streak: data.streak || 0,
+          xp: isResetDone ? (data.xp || 0) : 0,
+          coins: isResetDone ? (data.coins || 0) : 0,
+          streak: isResetDone ? (data.streak || 1) : 1,
           completedGames: data.completedGames || [],
           dailyActiveSeconds: data.dailyActiveSeconds || 0
         });
@@ -124,8 +146,88 @@ export const AdminPortal: React.FC = () => {
   useEffect(() => {
     if (isLoggedIn) {
       fetchStudentsData();
+      fetchSurveysData();
     }
   }, [isLoggedIn]);
+
+  // Fetch all student survey responses
+  const fetchSurveysData = async () => {
+    if (!isFirebaseEnabled || !db) {
+      // Fallback local mock survey data for testing
+      const mockSurveys: SurveyData[] = [
+        { id: '1', studentName: 'Aditya Kumar', mobileNumber: '9876543211', school: 'exscl-01', grade: 'Grade 8', rating: 5, favoriteGame: 'Grammar Galaxy', feedbackText: 'I love the interactive grammar levels! The fairness reset is good so everyone gets a fair chance.', fairnessAgreed: true, submittedAt: new Date(Date.now() - 3600000).toISOString() },
+        { id: '2', studentName: 'Sneha Patel', mobileNumber: '9123456780', school: 'exscl-02', grade: 'Grade 7', rating: 4, favoriteGame: 'SpeakScore AI', feedbackText: 'Pronunciation feedback is super helpful. Would like more stories!', fairnessAgreed: true, submittedAt: new Date(Date.now() - 7200000).toISOString() },
+        { id: '3', studentName: 'Vikram Singh', mobileNumber: '9988776655', school: 'exscl-05', grade: 'Grade 9', rating: 5, favoriteGame: 'Escape Room English', feedbackText: 'Escape room game is very challenging and fun!', fairnessAgreed: true, submittedAt: new Date(Date.now() - 14400000).toISOString() },
+        { id: '4', studentName: 'Priya Sharma', mobileNumber: '9000111222', school: 'exscl-03', grade: 'Grade 6', rating: 5, favoriteGame: 'Word Rush', feedbackText: 'Great game for learning new vocabulary words fast.', fairnessAgreed: true, submittedAt: new Date(Date.now() - 28800000).toISOString() },
+      ];
+      setSurveys(mockSurveys);
+      return;
+    }
+
+    setSurveysLoading(true);
+    try {
+      const q = query(collection(db, 'surveys'), orderBy('submittedAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const list: SurveyData[] = [];
+      querySnapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        list.push({
+          id: docSnap.id,
+          studentName: d.studentName || 'Anonymous',
+          mobileNumber: d.mobileNumber || '',
+          school: d.school || '',
+          grade: d.grade || '',
+          rating: d.rating || 5,
+          favoriteGame: d.favoriteGame || 'General',
+          feedbackText: d.feedbackText || '',
+          fairnessAgreed: d.fairnessAgreed ?? true,
+          submittedAt: d.submittedAt || new Date().toISOString()
+        });
+      });
+      setSurveys(list);
+    } catch (err) {
+      console.error('Error fetching survey responses:', err);
+    } finally {
+      setSurveysLoading(false);
+    }
+  };
+
+  // Execute batch reset across Firestore database (forces coins, XP, streaks, scores = 0 for all students)
+  const executeBatchResetAllStudents = async () => {
+    if (!window.confirm("ARE YOU SURE? This will reset all student coins, XP, streaks, and high scores to 0 across the entire database for fairness!")) {
+      return;
+    }
+    setBatchResetStatus({ running: true, message: 'Executing database fairness reset...' });
+    if (!isFirebaseEnabled || !db) {
+      setStudents(prev => prev.map(s => ({ ...s, xp: 0, coins: 0, streak: 1 })));
+      setBatchResetStatus({ running: false, message: 'Local database successfully reset to 0!' });
+      return;
+    }
+
+    try {
+      const querySnapshot = await getDocs(collection(db, 'students'));
+      const batch = writeBatch(db);
+      let count = 0;
+      querySnapshot.forEach((docSnap) => {
+        batch.update(docSnap.ref, {
+          xp: 0,
+          coins: 0,
+          streak: 1,
+          chessHighScore: 0,
+          escapeRoomHighScore: 0,
+          speakScoreHighScore: 0,
+          hasSeenFairnessResetV1: true
+        });
+        count++;
+      });
+      await batch.commit();
+      setBatchResetStatus({ running: false, message: `Successfully reset ${count} student profiles in database to 0!` });
+      fetchStudentsData();
+    } catch (err) {
+      console.error('Batch reset error:', err);
+      setBatchResetStatus({ running: false, message: 'Failed to reset database: ' + (err as Error).message });
+    }
+  };
 
   // Login handler
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -202,6 +304,24 @@ export const AdminPortal: React.FC = () => {
     exportToCSV(`${schoolName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_students.csv`, headers, rows);
   };
 
+  // Download all survey responses CSV
+  const handleDownloadSurveysCSV = () => {
+    const headers = ['Submitted Date', 'Student Name', 'Mobile Number', 'School Code', 'School Name', 'Grade', 'Star Rating', 'Favorite Game', 'Feedback Comments', 'Fairness Agreed'];
+    const rows = filteredSurveys.map(s => [
+      new Date(s.submittedAt).toLocaleString(),
+      s.studentName,
+      s.mobileNumber,
+      s.school,
+      getSchoolName(s.school),
+      s.grade,
+      s.rating.toString(),
+      s.favoriteGame,
+      s.feedbackText,
+      s.fairnessAgreed ? 'Yes' : 'No'
+    ]);
+    exportToCSV('student_surveys_feedback_report.csv', headers, rows);
+  };
+
   // Switch to Student Directory filtered by chosen school
   const handleSchoolClick = (schoolCode: string) => {
     setSchoolFilter(schoolCode);
@@ -212,8 +332,6 @@ export const AdminPortal: React.FC = () => {
 
   // Calculations for Overview Tab
   const totalStudents = students.length;
-  const totalXP = students.reduce((acc, s) => acc + s.xp, 0);
-  const averageXP = totalStudents > 0 ? Math.round(totalXP / totalStudents) : 0;
   
   // Calculate active schools
   const activeSchoolsList = Array.from(new Set(students.map(s => s.school))) as string[];
@@ -242,6 +360,20 @@ export const AdminPortal: React.FC = () => {
     const matchesGrade = gradeFilter === 'all' || s.grade === gradeFilter;
     return matchesSearch && matchesSchool && matchesGrade;
   });
+
+  // Filtered surveys
+  const filteredSurveys = surveys.filter(s => {
+    const matchesSearch = s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          s.mobileNumber.includes(searchTerm) ||
+                          s.feedbackText.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSchool = schoolFilter === 'all' || s.school === schoolFilter;
+    const matchesGrade = gradeFilter === 'all' || s.grade === gradeFilter;
+    const matchesRating = ratingFilter === 'all' || s.rating.toString() === ratingFilter;
+    return matchesSearch && matchesSchool && matchesGrade && matchesRating;
+  });
+
+  const totalSurveys = surveys.length;
+  const averageRating = totalSurveys > 0 ? (surveys.reduce((acc, s) => acc + s.rating, 0) / totalSurveys).toFixed(1) : '5.0';
 
   if (!isLoggedIn) {
     return (
@@ -475,7 +607,44 @@ export const AdminPortal: React.FC = () => {
         >
           👤 Student Directory
         </button>
+        <button
+          onClick={() => setActiveTab('surveys')}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.85rem',
+            fontWeight: 800,
+            background: activeTab === 'surveys' ? 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)' : 'transparent',
+            color: activeTab === 'surveys' ? '#fff' : '#94a3b8',
+            transition: 'all 0.2s',
+            textAlign: isMobile ? 'left' : 'center',
+            width: isMobile ? '100%' : 'auto'
+          }}
+        >
+          📝 Student Feedback & Surveys ({totalSurveys})
+        </button>
       </div>
+
+      {batchResetStatus.message && (
+        <div style={{
+          background: 'rgba(6, 182, 212, 0.1)',
+          border: '1px solid rgba(6, 182, 212, 0.3)',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          color: '#38bdf8',
+          fontSize: '0.9rem',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1.5rem'
+        }}>
+          <ShieldAlert style={{ width: '20px', height: '20px' }} />
+          <span>{batchResetStatus.message}</span>
+        </div>
+      )}
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px', color: '#94a3b8', fontSize: '1rem', fontWeight: 600 }}>
@@ -521,32 +690,36 @@ export const AdminPortal: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div 
+                  className="glass-card hover-lift" 
+                  onClick={() => setActiveTab('surveys')}
+                  style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', cursor: 'pointer' }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(234, 179, 8, 0.1)', color: '#eab308' }}>
-                    <Award style={{ width: '22px', height: '22px' }} />
+                    <MessageSquare style={{ width: '22px', height: '22px' }} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Collective XP</span>
-                    <h3 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '2px 0 0 0' }}>{totalXP}</h3>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Survey Feedback</span>
+                    <h3 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '2px 0 0 0' }}>{totalSurveys} Submissions</h3>
                   </div>
                 </div>
 
                 <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                    <Trophy style={{ width: '22px', height: '22px' }} />
+                    <Star style={{ width: '22px', height: '22px' }} />
                   </div>
                   <div>
-                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Average Student XP</span>
-                    <h3 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '2px 0 0 0' }}>{averageXP}</h3>
+                    <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>Avg Student Rating</span>
+                    <h3 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '2px 0 0 0' }}>{averageRating} / 5 ⭐</h3>
                   </div>
                 </div>
               </div>
 
-              {/* Quick Exports Card */}
+              {/* Quick Exports & Database Fairness Reset Card */}
               <div className="glass-card" style={{ padding: isMobile ? '1.25rem 1rem' : '2rem' }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Platform Data Exports</h3>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Platform Data & Database Management</h3>
                 <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: '0 0 1.5rem 0' }}>
-                  Download high-level student performance analytics and registrations in clean CSV formats suitable for spreadsheet tools.
+                  Export platform reports, view survey feedback, or execute a database fairness reset to set all student ranks, coins, and XP to 0 across Firestore.
                 </p>
 
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -573,6 +746,55 @@ export const AdminPortal: React.FC = () => {
                   >
                     <Download style={{ width: '16px', height: '16px' }} />
                     Download All Students CSV
+                  </button>
+
+                  <button 
+                    onClick={handleDownloadSurveysCSV}
+                    style={{
+                      background: 'rgba(139, 92, 246, 0.15)',
+                      border: '1px solid rgba(139, 92, 246, 0.3)',
+                      color: '#a78bfa',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      transition: 'all 0.2s',
+                      width: isMobile ? '100%' : 'auto',
+                      justifyContent: 'center'
+                    }}
+                    className="hover-lift"
+                  >
+                    <Download style={{ width: '16px', height: '16px' }} />
+                    Download Survey Feedback CSV
+                  </button>
+
+                  <button 
+                    onClick={executeBatchResetAllStudents}
+                    disabled={batchResetStatus.running}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: '#f87171',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      fontSize: '0.88rem',
+                      cursor: batchResetStatus.running ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      transition: 'all 0.2s',
+                      width: isMobile ? '100%' : 'auto',
+                      justifyContent: 'center'
+                    }}
+                    className="hover-lift"
+                  >
+                    <RefreshCw style={{ width: '16px', height: '16px' }} />
+                    {batchResetStatus.running ? 'Resetting Database...' : '⚡ Execute Database Fairness Reset (Zero All Ranks & Coins)'}
                   </button>
                 </div>
               </div>
@@ -955,6 +1177,216 @@ export const AdminPortal: React.FC = () => {
                   {filteredStudents.length === 0 && (
                     <div style={{ gridColumn: '1 / -1', padding: '30px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
                       No students matching filters found.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 4: STUDENT FEEDBACK & SURVEYS */}
+          {activeTab === 'surveys' && (
+            <div className="glass-card" style={{ padding: isMobile ? '1.25rem 1rem' : '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '1rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <MessageSquare style={{ color: '#8b5cf6', width: '24px', height: '24px' }} />
+                    Student Feedback & Survey Responses
+                  </h3>
+                  <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                    Live feedback submitted by students after opening the game and acknowledging the fairness reset.
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleDownloadSurveysCSV}
+                  style={{
+                    background: 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%)',
+                    border: 'none',
+                    color: '#fff',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 4px 12px rgba(6, 182, 212, 0.2)'
+                  }}
+                  className="hover-lift"
+                >
+                  <Download style={{ width: '16px', height: '16px' }} />
+                  Export Surveys CSV
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <Search style={{ position: 'absolute', left: '12px', width: '16px', height: '16px', color: '#64748b' }} />
+                  <input 
+                    type="text"
+                    placeholder="Search feedback or name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px 10px 36px',
+                      borderRadius: '8px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      color: '#fff',
+                      outline: 'none',
+                      fontSize: '0.88rem'
+                    }}
+                  />
+                </div>
+
+                {/* Rating Filter */}
+                <select
+                  value={ratingFilter}
+                  onChange={(e) => setRatingFilter(e.target.value)}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#fff',
+                    outline: 'none',
+                    fontSize: '0.88rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="all" style={{ background: '#0f0f16', color: '#fff' }}>All Star Ratings</option>
+                  <option value="5" style={{ background: '#0f0f16', color: '#fff' }}>5 Stars (😍 Excellent)</option>
+                  <option value="4" style={{ background: '#0f0f16', color: '#fff' }}>4 Stars (😀 Good)</option>
+                  <option value="3" style={{ background: '#0f0f16', color: '#fff' }}>3 Stars (😐 Okay)</option>
+                  <option value="2" style={{ background: '#0f0f16', color: '#fff' }}>2 Stars (🙁 Needs Work)</option>
+                  <option value="1" style={{ background: '#0f0f16', color: '#fff' }}>1 Star (😡 Poor)</option>
+                </select>
+
+                {/* School Filter */}
+                <select
+                  value={schoolFilter}
+                  onChange={(e) => setSchoolFilter(e.target.value)}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#fff',
+                    outline: 'none',
+                    fontSize: '0.88rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="all" style={{ background: '#0f0f16', color: '#fff' }}>All Schools</option>
+                  {Object.entries(SCHOOL_MAPPING).map(([code, name]) => (
+                    <option key={code} value={code} style={{ background: '#0f0f16', color: '#fff' }}>{name}</option>
+                  ))}
+                </select>
+
+                {/* Clear button */}
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSchoolFilter('all');
+                    setGradeFilter('all');
+                    setRatingFilter('all');
+                  }}
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#f3f4f6',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Clear Filters
+                </button>
+              </div>
+
+              <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Showing <strong>{filteredSurveys.length}</strong> of <strong>{surveys.length}</strong> responses
+              </div>
+
+              {/* Survey Responses List */}
+              {surveysLoading ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Loading survey responses...</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {filteredSurveys.map((sv, idx) => (
+                    <div 
+                      key={sv.id || idx}
+                      className="glass-card"
+                      style={{
+                        padding: '1.25rem 1.5rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                        border: '1px solid rgba(255,255,255,0.06)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div>
+                          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f3f4f6' }}>{sv.studentName}</span>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginLeft: '0.5rem' }}>
+                            ({sv.grade} • {getSchoolName(sv.school)})
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          {[1, 2, 3, 4, 5].map((st) => (
+                            <Star 
+                              key={st} 
+                              style={{ 
+                                width: '16px', 
+                                height: '16px', 
+                                color: st <= sv.rating ? '#f59e0b' : '#475569',
+                                fill: st <= sv.rating ? '#f59e0b' : 'transparent'
+                              }} 
+                            />
+                          ))}
+                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f59e0b', marginLeft: '4px' }}>
+                            {sv.rating}/5
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.82rem', color: '#cbd5e1' }}>
+                        <div>📱 Mobile: <strong style={{ fontFamily: 'monospace' }}>{sv.mobileNumber}</strong></div>
+                        <div>🎮 Favorite Game: <strong style={{ color: '#06b6d4' }}>{sv.favoriteGame}</strong></div>
+                        <div>📅 Date: <span>{new Date(sv.submittedAt).toLocaleDateString()} {new Date(sv.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span></div>
+                      </div>
+
+                      {sv.feedbackText && (
+                        <div style={{
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          borderLeft: '3px solid #8b5cf6',
+                          borderRadius: '4px 8px 8px 4px',
+                          padding: '8px 12px',
+                          fontSize: '0.88rem',
+                          color: '#e2e8f0',
+                          lineHeight: 1.5,
+                          fontStyle: 'italic'
+                        }}>
+                          "{sv.feedbackText}"
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: '#10b981', fontWeight: 700 }}>
+                        <CheckCircle2 style={{ width: '14px', height: '14px' }} />
+                        <span>Fairness Reset Acknowledged & Agreed</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {filteredSurveys.length === 0 && (
+                    <div style={{ padding: '3rem 1rem', textAlign: 'center', color: '#94a3b8' }}>
+                      No survey responses found matching filters.
                     </div>
                   )}
                 </div>

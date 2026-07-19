@@ -36,8 +36,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     idiomMatchLevelIndex,
     timeTransformerLevelIndex,
     actionWordsLevelIndex,
-    partsOfSpeechLevelIndex
+    partsOfSpeechLevelIndex,
+    hasSeenFairnessResetV1
   } = useUserStore();
+
+  const displayXp = hasSeenFairnessResetV1 ? xp : 0;
+  const displayCoins = hasSeenFairnessResetV1 ? coins : 0;
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [globalLeaderboard, setGlobalLeaderboard] = useState<any[]>([]);
@@ -86,34 +90,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     let active = true;
     const fetchLeaderboard = async () => {
       const fallbackSchool = [
-        { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 2200, isSelf: false },
-        { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1800, isSelf: false },
-        { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1500, isSelf: false },
+        { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0, isSelf: false },
+        { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0, isSelf: false },
+        { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0, isSelf: false },
         { name: `${name} (You)`, grade: grade || 'Grade 7', school: school || 'exscl-02', xp: xp, isSelf: true }
       ];
 
       const getFallbackGlobal = () => {
         const list = [
-          { name: 'Aditya', grade: 'Grade 8', school: 'exscl-01', xp: 4500, isSelf: false },
-          { name: 'Sneha', grade: grade || 'Grade 7', school: 'exscl-02', xp: 3800, isSelf: false },
-          { name: 'Vikram', grade: 'Grade 9', school: 'exscl-05', xp: 3500, isSelf: false },
-          { name: 'Priya', grade: 'Grade 6', school: 'exscl-03', xp: 3200, isSelf: false },
-          { name: 'Rahul', grade: 'Grade 8', school: 'exscl-06', xp: 2900, isSelf: false },
-          { name: 'Ananya', grade: 'Grade 7', school: 'exscl-01', xp: 2700, isSelf: false },
-          { name: 'Karan', grade: 'Grade 9', school: 'exscl-04', xp: 2500, isSelf: false },
-          { name: 'Tanvi', grade: 'Grade 6', school: 'exscl-07', xp: 2300, isSelf: false },
-          { name: 'Kunal', grade: 'Grade 8', school: 'exscl-08', xp: 2100, isSelf: false },
-          { name: 'Riddhi', grade: 'Grade 7', school: 'exscl-09', xp: 2000, isSelf: false },
-          { name: 'Amit', grade: grade || 'Grade 7', school: 'exscl-02', xp: 1800, isSelf: false },
-          { name: 'Rohan', grade: grade || 'Grade 7', school: 'exscl-02', xp: 1500, isSelf: false },
-          { name: 'Siddharth', grade: 'Grade 9', school: 'exscl-10', xp: 1700, isSelf: false },
-          { name: 'Meera', grade: 'Grade 8', school: 'exscl-11', xp: 1600, isSelf: false },
-          { name: 'Dev', grade: 'Grade 6', school: 'exscl-12', xp: 1400, isSelf: false },
-          { name: 'Riya', grade: 'Grade 7', school: 'exscl-13', xp: 1300, isSelf: false },
-          { name: 'Arjun', grade: 'Grade 9', school: 'exscl-14', xp: 1200, isSelf: false },
-          { name: 'Ishita', grade: 'Grade 8', school: 'exscl-15', xp: 1100, isSelf: false },
-          { name: 'Yash', grade: 'Grade 7', school: 'exscl-16', xp: 950, isSelf: false },
-          { name: 'Nisha', grade: 'Grade 6', school: 'exscl-17', xp: 800, isSelf: false }
+          { name: 'Aditya', grade: 'Grade 8', school: 'exscl-01', xp: 0, isSelf: false },
+          { name: 'Sneha', grade: grade || 'Grade 7', school: 'exscl-02', xp: 0, isSelf: false },
+          { name: 'Vikram', grade: 'Grade 9', school: 'exscl-05', xp: 0, isSelf: false },
+          { name: 'Priya', grade: 'Grade 6', school: 'exscl-03', xp: 0, isSelf: false },
+          { name: 'Rahul', grade: 'Grade 8', school: 'exscl-06', xp: 0, isSelf: false },
+          { name: 'Ananya', grade: 'Grade 7', school: 'exscl-01', xp: 0, isSelf: false },
+          { name: 'Karan', grade: 'Grade 9', school: 'exscl-04', xp: 0, isSelf: false },
+          { name: 'Tanvi', grade: 'Grade 6', school: 'exscl-07', xp: 0, isSelf: false },
+          { name: 'Kunal', grade: 'Grade 8', school: 'exscl-08', xp: 0, isSelf: false },
+          { name: 'Riddhi', grade: 'Grade 7', school: 'exscl-09', xp: 0, isSelf: false },
         ];
 
         // Ensure user is present in fallback global
@@ -147,11 +141,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             const isSelf = data.name === name || data.mobileNumber === useUserStore.getState().mobileNumber;
+            const isResetDone = data.hasSeenFairnessResetV1 ?? false;
             schoolPlayers.push({
               name: isSelf ? `${name} (You)` : data.name,
               grade: data.grade || 'Grade 7',
               school: data.school || school,
-              xp: data.xp || 0,
+              xp: isResetDone ? (data.xp || 0) : 0,
               isSelf
             });
           });
@@ -170,9 +165,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
 
         // Fill school if needed
         const baseMocks = [
-          { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 2200 },
-          { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1800 },
-          { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 1500 },
+          { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0 },
+          { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0 },
+          { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0 },
         ];
         let mockIndex = 0;
         while (schoolPlayers.length < 4 && mockIndex < baseMocks.length) {
@@ -183,18 +178,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
         }
         schoolPlayers.sort((a, b) => b.xp - a.xp);
 
-        // Fetch Global Leaderboard (limiting queries is good, but we can query top 50 in firestore using limit)
+        // Fetch Global Leaderboard
         const qGlobal = query(collection(db, 'students'), orderBy('xp', 'desc'), limit(50));
         const globalSnapshot = await getDocs(qGlobal);
         const globalPlayers: any[] = [];
         globalSnapshot.forEach((doc) => {
           const data = doc.data();
           const isSelf = data.name === name || data.mobileNumber === useUserStore.getState().mobileNumber;
+          const isResetDone = data.hasSeenFairnessResetV1 ?? false;
           globalPlayers.push({
             name: isSelf ? `${name} (You)` : data.name,
             grade: data.grade || 'Grade 7',
             school: data.school || 'exscl-02',
-            xp: data.xp || 0,
+            xp: isResetDone ? (data.xp || 0) : 0,
             isSelf
           });
         });
@@ -429,11 +425,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
           </div>
           <div className="glass-card" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: 700 }}>
             <Star style={{ color: '#eab308', fill: '#eab308', width: '20px', height: '20px' }} />
-            <span>{xp} XP</span>
+            <span>{displayXp} XP</span>
           </div>
           <div className="glass-card" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '50px', fontSize: '0.9rem', fontWeight: 700 }}>
             <Coins style={{ color: '#f59e0b', fill: '#f59e0b', width: '20px', height: '20px' }} />
-            <span>{coins} Coins</span>
+            <span>{displayCoins} Coins</span>
           </div>
           <button 
             onClick={onOpenSettings}
@@ -517,7 +513,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
               const playersWithRank = currentLeaderboard.map((p, idx) => ({ ...p, rank: idx + 1 }));
               const selfIndex = playersWithRank.findIndex(p => p.isSelf);
               const selfRank = selfIndex >= 0 ? selfIndex + 1 : 1;
-              const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : { name: name, grade: grade, school: school, xp: xp, isSelf: true, rank: 1 };
+              const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : { name: name, grade: grade, school: school, xp: displayXp, isSelf: true, rank: 1 };
 
               let dashboardPlayers: any[] = [];
               if (selfIndex <= 2 || selfIndex === -1) {

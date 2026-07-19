@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { db, isFirebaseEnabled } from '../firebase/config';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc } from 'firebase/firestore';
 
 export const getTodayDateString = () => {
   const d = new Date();
@@ -42,7 +42,8 @@ interface UserState {
   timeTransformerLevelIndex: number;
   actionWordsLevelIndex: number;
   partsOfSpeechLevelIndex: number;
-  
+  hasSeenFairnessResetV1: boolean;
+  hasCompletedSurvey: boolean;
   
   addXp: (amount: number) => void;
   addCoins: (amount: number) => void;
@@ -68,6 +69,7 @@ interface UserState {
   setPartsOfSpeechLevelIndex: (levelIndex: number) => void;
   registerStudent: (details: { name: string; grade: string; school: string; mobileNumber: string }) => void;
   loginStudent: (mobileNumber: string) => Promise<boolean>;
+  completeFairnessResetAndSurvey: (surveyData?: { rating: number; favoriteGame: string; feedbackText: string; fairnessAgreed: boolean }) => Promise<void>;
   tickActiveTime: (seconds: number) => void;
   checkDailyReset: () => void;
   resetAll: () => void;
@@ -120,6 +122,8 @@ export const useUserStore = create<UserState>()(
         timeTransformerLevelIndex: 0,
         actionWordsLevelIndex: 0,
         partsOfSpeechLevelIndex: 0,
+        hasSeenFairnessResetV1: false,
+        hasCompletedSurvey: false,
 
         addXp: (amount) =>
           set((state) => {
@@ -269,8 +273,8 @@ export const useUserStore = create<UserState>()(
             school: details.school,
             mobileNumber: details.mobileNumber,
             onboarded: true,
-            xp: 100, // starting bonus
-            coins: 10,
+            xp: 0,
+            coins: 0,
             streak: 1,
             completedGames: [],
             grammarGalaxyLevelIndex: 0,
@@ -292,6 +296,8 @@ export const useUserStore = create<UserState>()(
             timeTransformerLevelIndex: 0,
             actionWordsLevelIndex: 0,
             partsOfSpeechLevelIndex: 0,
+            hasSeenFairnessResetV1: true,
+            hasCompletedSurvey: true,
           };
 
           set(() => studentData);
@@ -312,15 +318,17 @@ export const useUserStore = create<UserState>()(
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
               const data = docSnap.data();
+              const isResetDone = data.hasSeenFairnessResetV1 ?? false;
+              
               set(() => ({
                 name: data.name || '',
                 grade: data.grade || 'Grade 7',
                 school: data.school || '',
                 mobileNumber: data.mobileNumber || mobileNumber,
                 onboarded: true,
-                xp: data.xp ?? 0,
-                coins: data.coins ?? 0,
-                streak: data.streak ?? 1,
+                xp: isResetDone ? (data.xp ?? 0) : 0,
+                coins: isResetDone ? (data.coins ?? 0) : 0,
+                streak: isResetDone ? (data.streak ?? 1) : 1,
                 completedGames: data.completedGames || [],
                 grammarGalaxyLevelIndex: data.grammarGalaxyLevelIndex ?? 0,
                 grammarGalaxySlideIndex: data.grammarGalaxySlideIndex ?? 0,
@@ -333,14 +341,16 @@ export const useUserStore = create<UserState>()(
                 dailyActiveSeconds: data.dailyActiveSeconds ?? 0,
                 lastActiveDate: data.lastActiveDate || '',
                 lastStreakUpdatedDate: data.lastStreakUpdatedDate || '',
-                chessHighScore: data.chessHighScore ?? 0,
-                escapeRoomHighScore: data.escapeRoomHighScore ?? 0,
+                chessHighScore: isResetDone ? (data.chessHighScore ?? 0) : 0,
+                escapeRoomHighScore: isResetDone ? (data.escapeRoomHighScore ?? 0) : 0,
                 riyanStoryLevelIndex: data.riyanStoryLevelIndex ?? 0,
-                speakScoreHighScore: data.speakScoreHighScore ?? 0,
+                speakScoreHighScore: isResetDone ? (data.speakScoreHighScore ?? 0) : 0,
                 idiomMatchLevelIndex: data.idiomMatchLevelIndex ?? 0,
                 timeTransformerLevelIndex: data.timeTransformerLevelIndex ?? 0,
                 actionWordsLevelIndex: data.actionWordsLevelIndex ?? 0,
                 partsOfSpeechLevelIndex: data.partsOfSpeechLevelIndex ?? 0,
+                hasSeenFairnessResetV1: isResetDone,
+                hasCompletedSurvey: data.hasCompletedSurvey ?? false,
               }));
               return true;
             }
@@ -348,6 +358,42 @@ export const useUserStore = create<UserState>()(
           } catch (error) {
             console.error('Failed to query student profile from Firestore:', error);
             return false;
+          }
+        },
+        completeFairnessResetAndSurvey: async (surveyData) => {
+          const state = get();
+          const updates = {
+            xp: 0,
+            coins: 0,
+            streak: 1,
+            chessHighScore: 0,
+            escapeRoomHighScore: 0,
+            speakScoreHighScore: 0,
+            hasSeenFairnessResetV1: true,
+            hasCompletedSurvey: true,
+          };
+
+          set(() => updates);
+
+          if (isFirebaseEnabled && db && state.mobileNumber) {
+            try {
+              await updateDoc(doc(db, 'students', state.mobileNumber), updates);
+              if (surveyData) {
+                await addDoc(collection(db, 'surveys'), {
+                  studentName: state.name || 'Anonymous',
+                  mobileNumber: state.mobileNumber,
+                  grade: state.grade || 'Grade 7',
+                  school: state.school || 'exscl-01',
+                  rating: surveyData.rating || 5,
+                  favoriteGame: surveyData.favoriteGame || 'General',
+                  feedbackText: surveyData.feedbackText || '',
+                  fairnessAgreed: surveyData.fairnessAgreed ?? true,
+                  submittedAt: new Date().toISOString(),
+                });
+              }
+            } catch (err) {
+              console.error('Failed to complete reset / submit survey to Firestore:', err);
+            }
           }
         },
         tickActiveTime: (seconds) =>
@@ -501,6 +547,15 @@ export const useUserStore = create<UserState>()(
     },
     {
       name: 'excellence-voices-pro-user-storage',
+      onRehydrateStorage: () => (state) => {
+        if (state && !state.hasSeenFairnessResetV1) {
+          state.xp = 0;
+          state.coins = 0;
+          state.chessHighScore = 0;
+          state.escapeRoomHighScore = 0;
+          state.speakScoreHighScore = 0;
+        }
+      }
     }
   )
 );

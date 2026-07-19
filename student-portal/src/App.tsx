@@ -21,6 +21,7 @@ import { HelpModal } from './components/HelpModal';
 import { SettingsModal } from './components/SettingsModal';
 import { useSpeech } from './hooks/useSpeech';
 import { AdminPortal } from './components/AdminPortal';
+import { ResetAnnouncementSurveyModal } from './components/ResetAnnouncementSurveyModal';
 import { ActionWordsWithForms } from './components/ActionWordsWithForms';
 import { PartsOfSpeech } from './components/PartsOfSpeech';
 
@@ -32,7 +33,7 @@ function App() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, lastActiveDate, tickActiveTime, checkDailyReset } = useUserStore();
+  const { theme, themeMode, onboarded, name, grade, school, completedGames, dailyActiveSeconds, lastActiveDate, tickActiveTime, checkDailyReset, hasSeenFairnessResetV1 } = useUserStore();
   const { cancel } = useSpeech();
 
   // Listen to hash change to toggle admin mode
@@ -116,6 +117,19 @@ function App() {
     }
   }, [dailyActiveSeconds, cancel]);
 
+  // Enforce zero XP and coins immediately if the fairness reset has not been completed yet
+  useEffect(() => {
+    if (onboarded && !hasSeenFairnessResetV1) {
+      useUserStore.setState({
+        xp: 0,
+        coins: 0,
+        chessHighScore: 0,
+        escapeRoomHighScore: 0,
+        speakScoreHighScore: 0
+      });
+    }
+  }, [onboarded, hasSeenFairnessResetV1]);
+
   // Check and reset daily screen-time limit if the calendar day has changed
   useEffect(() => {
     if (onboarded) {
@@ -142,6 +156,9 @@ function App() {
 
   return (
     <main className="main-container">
+      {onboarded && !hasSeenFairnessResetV1 && (
+        <ResetAnnouncementSurveyModal />
+      )}
       
       {showHelp && (
         <HelpModal onClose={() => setShowHelp(false)} />
