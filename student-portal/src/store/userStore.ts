@@ -362,6 +362,14 @@ export const useUserStore = create<UserState>()(
         },
         completeFairnessResetAndSurvey: async (surveyData) => {
           const state = get();
+          const surveyPayload = surveyData ? {
+            rating: surveyData.rating || 5,
+            favoriteGame: surveyData.favoriteGame || 'General',
+            feedbackText: surveyData.feedbackText || '',
+            fairnessAgreed: surveyData.fairnessAgreed ?? true,
+            submittedAt: new Date().toISOString(),
+          } : null;
+
           const updates = {
             xp: 0,
             coins: 0,
@@ -371,25 +379,29 @@ export const useUserStore = create<UserState>()(
             speakScoreHighScore: 0,
             hasSeenFairnessResetV1: true,
             hasCompletedSurvey: true,
+            ...(surveyPayload ? { surveyResponse: surveyPayload } : {})
           };
 
           set(() => updates);
 
           if (isFirebaseEnabled && db && state.mobileNumber) {
             try {
-              await updateDoc(doc(db, 'students', state.mobileNumber), updates);
-              if (surveyData) {
-                await addDoc(collection(db, 'surveys'), {
-                  studentName: state.name || 'Anonymous',
-                  mobileNumber: state.mobileNumber,
-                  grade: state.grade || 'Grade 7',
-                  school: state.school || 'exscl-01',
-                  rating: surveyData.rating || 5,
-                  favoriteGame: surveyData.favoriteGame || 'General',
-                  feedbackText: surveyData.feedbackText || '',
-                  fairnessAgreed: surveyData.fairnessAgreed ?? true,
-                  submittedAt: new Date().toISOString(),
-                });
+              // Save directly into student document (100% permitted under Firestore rules)
+              await setDoc(doc(db, 'students', state.mobileNumber), updates, { merge: true });
+
+              // Also try separate surveys collection
+              if (surveyPayload) {
+                try {
+                  await addDoc(collection(db, 'surveys'), {
+                    studentName: state.name || 'Anonymous',
+                    mobileNumber: state.mobileNumber,
+                    grade: state.grade || 'Grade 7',
+                    school: state.school || 'exscl-01',
+                    ...surveyPayload
+                  });
+                } catch (surveyColErr) {
+                  console.warn('Surveys collection fallback triggered:', surveyColErr);
+                }
               }
             } catch (err) {
               console.error('Failed to complete reset / submit survey to Firestore:', err);

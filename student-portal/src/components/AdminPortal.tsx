@@ -166,24 +166,64 @@ export const AdminPortal: React.FC = () => {
 
     setSurveysLoading(true);
     try {
-      const q = query(collection(db, 'surveys'), orderBy('submittedAt', 'desc'));
-      const querySnapshot = await getDocs(q);
       const list: SurveyData[] = [];
-      querySnapshot.forEach((docSnap) => {
-        const d = docSnap.data();
-        list.push({
-          id: docSnap.id,
-          studentName: d.studentName || 'Anonymous',
-          mobileNumber: d.mobileNumber || '',
-          school: d.school || '',
-          grade: d.grade || '',
-          rating: d.rating || 5,
-          favoriteGame: d.favoriteGame || 'General',
-          feedbackText: d.feedbackText || '',
-          fairnessAgreed: d.fairnessAgreed ?? true,
-          submittedAt: d.submittedAt || new Date().toISOString()
+      const seenMobiles = new Set<string>();
+
+      // 1. Read survey responses directly from students collection (guaranteed permissions)
+      try {
+        const studentsSnap = await getDocs(collection(db, 'students'));
+        studentsSnap.forEach((docSnap) => {
+          const d = docSnap.data();
+          const sr = d.surveyResponse || (d.feedbackText || d.rating ? d : null);
+          if (sr && (sr.rating || sr.feedbackText)) {
+            const mobile = d.mobileNumber || docSnap.id;
+            seenMobiles.add(mobile);
+            list.push({
+              id: docSnap.id,
+              studentName: d.name || 'Anonymous',
+              mobileNumber: mobile,
+              school: d.school || '',
+              grade: d.grade || '',
+              rating: sr.rating || 5,
+              favoriteGame: sr.favoriteGame || 'General',
+              feedbackText: sr.feedbackText || '',
+              fairnessAgreed: sr.fairnessAgreed ?? true,
+              submittedAt: sr.submittedAt || new Date().toISOString()
+            });
+          }
         });
-      });
+      } catch (studentErr) {
+        console.error('Error reading embedded surveys from students collection:', studentErr);
+      }
+
+      // 2. Read from separate 'surveys' collection if accessible
+      try {
+        const surveysSnap = await getDocs(collection(db, 'surveys'));
+        surveysSnap.forEach((docSnap) => {
+          const d = docSnap.data();
+          const mobile = d.mobileNumber || docSnap.id;
+          if (!seenMobiles.has(mobile)) {
+            seenMobiles.add(mobile);
+            list.push({
+              id: docSnap.id,
+              studentName: d.studentName || 'Anonymous',
+              mobileNumber: mobile,
+              school: d.school || '',
+              grade: d.grade || '',
+              rating: d.rating || 5,
+              favoriteGame: d.favoriteGame || 'General',
+              feedbackText: d.feedbackText || '',
+              fairnessAgreed: d.fairnessAgreed ?? true,
+              submittedAt: d.submittedAt || new Date().toISOString()
+            });
+          }
+        });
+      } catch (surveysErr) {
+        console.warn('Separate surveys collection fallback:', surveysErr);
+      }
+
+      // Sort by submittedAt descending
+      list.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
       setSurveys(list);
     } catch (err) {
       console.error('Error fetching survey responses:', err);
