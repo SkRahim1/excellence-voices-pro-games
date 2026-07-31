@@ -683,12 +683,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                             whiteSpace: 'nowrap',
                             marginBottom: '0.25rem'
                           }}>
-                            {rankEmoji} {player.name.replace(' (You)', '')}
+                            {rankEmoji} {(player?.name || 'Student').replace(' (You)', '')}
                           </div>
 
                           {/* XP value */}
                           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 700 }}>
-                            {player.xp} XP
+                            {player?.xp || 0} XP
                           </div>
 
                           {/* Podium Pillar */}

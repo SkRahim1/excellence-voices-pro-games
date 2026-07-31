@@ -61,6 +61,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
         width: '100%',
         padding: '2rem',
         maxHeight: '88vh',
+        minHeight: '320px',
         display: 'flex',
         flexDirection: 'column',
         gap: '1.25rem',
@@ -176,6 +177,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
         {/* Leaderboard Table / List */}
         <div style={{ 
           flex: 1, 
+          minHeight: 0,
           overflowY: 'auto', 
           display: 'flex', 
           flexDirection: 'column', 
@@ -237,7 +239,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   {/* Player details */}
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
-                      {player.name.replace(' (You)', '')} {player.isSelf && '🏆'}
+                      {(player?.name || 'Student').replace(' (You)', '')} {player?.isSelf && '🏆'}
                     </div>
                     <div style={{ 
                       display: 'flex', 
@@ -245,17 +247,17 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                       alignItems: 'center', 
                       gap: '0.4rem', 
                       fontSize: '0.75rem', 
-                      color: player.isSelf ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)' 
+                      color: player?.isSelf ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)' 
                     }}>
-                      <span>{player.grade}</span>
-                      {activeTab === 'global' && player.school && (
+                      <span>{player?.grade || 'Grade 7'}</span>
+                      {activeTab === 'global' && player?.school && (
                         <>
                           <span style={{ opacity: 0.5 }}>•</span>
                           <span style={{
-                            background: player.isSelf 
+                            background: player?.isSelf 
                               ? 'rgba(255,255,255,0.2)' 
                               : (theme === 'kids' ? '#e0f2fe' : 'var(--btn-bg-ghost)'),
-                            color: player.isSelf
+                            color: player?.isSelf
                               ? '#ffffff'
                               : (theme === 'kids' ? '#0369a1' : 'var(--text-muted)'),
                             padding: '1px 6px',
@@ -272,8 +274,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
 
                   {/* XP Count */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 800 }}>
-                    <Award style={{ width: '16px', height: '16px', color: player.isSelf ? '#ffffff' : 'var(--accent-cyan)' }} />
-                    <span style={{ fontSize: '0.95rem' }}>{player.xp} XP</span>
+                    <Award style={{ width: '16px', height: '16px', color: player?.isSelf ? '#ffffff' : 'var(--accent-cyan)' }} />
+                    <span style={{ fontSize: '0.95rem' }}>{player?.xp || 0} XP</span>
                   </div>
                 </div>
               );
@@ -322,7 +324,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 {/* Player details */}
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
-                    {selfPlayer.name.replace(' (You)', '')} 🏆
+                    {(selfPlayer?.name || 'Student').replace(' (You)', '')} 🏆
                   </div>
                   <div style={{ 
                     display: 'flex', 
@@ -332,8 +334,8 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     fontSize: '0.75rem', 
                     color: 'rgba(255,255,255,0.75)' 
                   }}>
-                    <span>{selfPlayer.grade}</span>
-                    {activeTab === 'global' && selfPlayer.school && (
+                    <span>{selfPlayer?.grade || 'Grade 7'}</span>
+                    {activeTab === 'global' && selfPlayer?.school && (
                       <>
                         <span style={{ opacity: 0.5 }}>•</span>
                         <span style={{
@@ -353,7 +355,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 {/* XP Count */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 800 }}>
                   <Award style={{ width: '16px', height: '16px', color: '#ffffff' }} />
-                  <span style={{ fontSize: '0.95rem' }}>{selfPlayer.xp} XP</span>
+                  <span style={{ fontSize: '0.95rem' }}>{selfPlayer?.xp || 0} XP</span>
                 </div>
               </div>
             </>
