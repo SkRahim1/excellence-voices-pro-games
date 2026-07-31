@@ -1017,9 +1017,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
       
       {showLeaderboardModal && (
         <LeaderboardModal 
+          key={`${leaderboardTab}-${showLeaderboardModal}`}
           onClose={() => setShowLeaderboardModal(false)} 
-          schoolLeaderboard={leaderboard} 
-          globalLeaderboard={globalLeaderboard}
+          schoolLeaderboard={leaderboard.length > 0 ? leaderboard : getFallbackGlobal()} 
+          globalLeaderboard={globalLeaderboard.length > 0 ? globalLeaderboard : getFallbackGlobal()}
           initialTab={leaderboardTab}
         />
       )}

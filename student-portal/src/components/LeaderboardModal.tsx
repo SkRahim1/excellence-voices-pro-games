@@ -56,7 +56,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
       zIndex: 9999999,
       padding: '1.5rem'
     }}>
-      <div className="glass-card" style={{
+      <div style={{
         maxWidth: '550px',
         width: '100%',
         padding: '2rem',
@@ -65,12 +65,15 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
         flexDirection: 'column',
         gap: '1.25rem',
         position: 'relative',
+        background: theme === 'kids' ? '#ffffff' : '#0f172a',
+        borderRadius: '24px',
         boxShadow: theme === 'kids'
           ? '0 20px 0px rgba(2, 132, 199, 0.15)'
-          : '0 20px 50px rgba(0, 0, 0, 0.5)',
+          : '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(6, 182, 212, 0.15)',
         border: theme === 'kids'
           ? '3px solid #7dd3fc'
-          : '1px solid rgba(255, 255, 255, 0.12)'
+          : '1px solid rgba(255, 255, 255, 0.15)',
+        color: 'var(--text-main)'
       }}>
         
         {/* Close Button */}
@@ -205,10 +208,10 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                     borderRadius: '12px',
                     background: player.isSelf 
                       ? (theme === 'kids' ? 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)' : 'var(--accent-gradient)') 
-                      : (theme === 'kids' ? '#f0f9ff' : 'var(--level-card-bg)'),
+                      : (theme === 'kids' ? '#f0f9ff' : 'rgba(255, 255, 255, 0.05)'),
                     border: player.isSelf 
                       ? '1.5px solid var(--accent-cyan)' 
-                      : (theme === 'kids' ? '1.5px solid #bae6fd' : '1px solid var(--border-divider)'),
+                      : (theme === 'kids' ? '1.5px solid #bae6fd' : '1px solid rgba(255, 255, 255, 0.08)'),
                     boxShadow: player.isSelf 
                       ? '0 4px 12px var(--accent-glow)' 
                       : 'none',
