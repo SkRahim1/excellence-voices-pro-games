@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useUserStore } from '../store/userStore';
 import { Flame, Star, Coins, Play, CheckCircle, Settings } from 'lucide-react';
 import { getSchoolName } from '../data/schools';
@@ -43,8 +43,55 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   const displayXp = hasSeenFairnessResetV1 ? xp : 0;
   const displayCoins = hasSeenFairnessResetV1 ? coins : 0;
 
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [globalLeaderboard, setGlobalLeaderboard] = useState<any[]>([]);
+  const getFallbackGlobal = useCallback(() => {
+    const list = [
+      { name: 'Aditya', grade: 'Grade 8', school: 'exscl-01', xp: 480, isSelf: false },
+      { name: 'Sneha', grade: grade || 'Grade 7', school: 'exscl-02', xp: 420, isSelf: false },
+      { name: 'Vikram', grade: 'Grade 9', school: 'exscl-05', xp: 380, isSelf: false },
+      { name: 'Priya', grade: 'Grade 6', school: 'exscl-03', xp: 350, isSelf: false },
+      { name: 'Rahul', grade: 'Grade 8', school: 'exscl-06', xp: 310, isSelf: false },
+      { name: 'Ananya', grade: 'Grade 7', school: 'exscl-01', xp: 290, isSelf: false },
+      { name: 'Karan', grade: 'Grade 9', school: 'exscl-04', xp: 270, isSelf: false },
+      { name: 'Tanvi', grade: 'Grade 6', school: 'exscl-07', xp: 250, isSelf: false },
+      { name: 'Kunal', grade: 'Grade 8', school: 'exscl-08', xp: 230, isSelf: false },
+      { name: 'Riddhi', grade: 'Grade 7', school: 'exscl-09', xp: 210, isSelf: false },
+      { name: 'Aarav', grade: 'Grade 8', school: 'exscl-10', xp: 190, isSelf: false },
+      { name: 'Diya', grade: 'Grade 6', school: 'exscl-11', xp: 180, isSelf: false },
+      { name: 'Ishaan', grade: 'Grade 9', school: 'exscl-12', xp: 170, isSelf: false },
+      { name: 'Meera', grade: 'Grade 7', school: 'exscl-13', xp: 160, isSelf: false },
+      { name: 'Kabir', grade: 'Grade 8', school: 'exscl-14', xp: 150, isSelf: false },
+      { name: 'Neha', grade: 'Grade 6', school: 'exscl-15', xp: 140, isSelf: false },
+      { name: 'Rohan', grade: 'Grade 7', school: 'exscl-02', xp: 130, isSelf: false },
+      { name: 'Siddharth', grade: 'Grade 9', school: 'exscl-16', xp: 120, isSelf: false },
+      { name: 'Tarun', grade: 'Grade 8', school: 'exscl-03', xp: 110, isSelf: false },
+      { name: 'Yash', grade: 'Grade 7', school: 'exscl-05', xp: 100, isSelf: false },
+    ];
+
+    const currentXp = hasSeenFairnessResetV1 ? xp : 0;
+    if (!list.some(p => p.name.includes('(You)') || p.isSelf)) {
+      list.push({
+        name: `${name} (You)`,
+        grade: grade || 'Grade 7',
+        school: school || 'exscl-02',
+        xp: currentXp,
+        isSelf: true
+      });
+    }
+    return list.sort((a, b) => b.xp - a.xp);
+  }, [grade, school, name, xp, hasSeenFairnessResetV1]);
+
+  const [leaderboard, setLeaderboard] = useState<any[]>(() => {
+    const currentXp = hasSeenFairnessResetV1 ? xp : 0;
+    const fallbackSchool = [
+      { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 280, isSelf: false },
+      { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 220, isSelf: false },
+      { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 160, isSelf: false },
+      { name: `${name} (You)`, grade: grade || 'Grade 7', school: school || 'exscl-02', xp: currentXp, isSelf: true }
+    ];
+    return fallbackSchool.sort((a, b) => b.xp - a.xp);
+  });
+
+  const [globalLeaderboard, setGlobalLeaderboard] = useState<any[]>(() => getFallbackGlobal());
   const [leaderboardTab, setLeaderboardTab] = useState<'school' | 'global'>('school');
   const [loading, setLoading] = useState(false);
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
@@ -89,39 +136,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
   useEffect(() => {
     let active = true;
     const fetchLeaderboard = async () => {
+      const currentXp = hasSeenFairnessResetV1 ? xp : 0;
       const fallbackSchool = [
-        { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0, isSelf: false },
-        { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0, isSelf: false },
-        { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0, isSelf: false },
-        { name: `${name} (You)`, grade: grade || 'Grade 7', school: school || 'exscl-02', xp: xp, isSelf: true }
+        { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 280, isSelf: false },
+        { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 220, isSelf: false },
+        { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 160, isSelf: false },
+        { name: `${name} (You)`, grade: grade || 'Grade 7', school: school || 'exscl-02', xp: currentXp, isSelf: true }
       ];
-
-      const getFallbackGlobal = () => {
-        const list = [
-          { name: 'Aditya', grade: 'Grade 8', school: 'exscl-01', xp: 0, isSelf: false },
-          { name: 'Sneha', grade: grade || 'Grade 7', school: 'exscl-02', xp: 0, isSelf: false },
-          { name: 'Vikram', grade: 'Grade 9', school: 'exscl-05', xp: 0, isSelf: false },
-          { name: 'Priya', grade: 'Grade 6', school: 'exscl-03', xp: 0, isSelf: false },
-          { name: 'Rahul', grade: 'Grade 8', school: 'exscl-06', xp: 0, isSelf: false },
-          { name: 'Ananya', grade: 'Grade 7', school: 'exscl-01', xp: 0, isSelf: false },
-          { name: 'Karan', grade: 'Grade 9', school: 'exscl-04', xp: 0, isSelf: false },
-          { name: 'Tanvi', grade: 'Grade 6', school: 'exscl-07', xp: 0, isSelf: false },
-          { name: 'Kunal', grade: 'Grade 8', school: 'exscl-08', xp: 0, isSelf: false },
-          { name: 'Riddhi', grade: 'Grade 7', school: 'exscl-09', xp: 0, isSelf: false },
-        ];
-
-        // Ensure user is present in fallback global
-        if (!list.some(p => p.name.includes('(You)') || p.isSelf)) {
-          list.push({
-            name: `${name} (You)`,
-            grade: grade || 'Grade 7',
-            school: school || 'exscl-02',
-            xp: xp,
-            isSelf: true
-          });
-        }
-        return list.sort((a, b) => b.xp - a.xp);
-      };
 
       if (!isFirebaseEnabled || !db) {
         if (active) {
@@ -157,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
             name: `${name} (You)`,
             grade: grade || 'Grade 7',
             school: school || 'exscl-02',
-            xp: xp,
+            xp: currentXp,
             isSelf: true
           });
         }
@@ -165,9 +186,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
 
         // Fill school if needed
         const baseMocks = [
-          { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0 },
-          { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0 },
-          { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 0 },
+          { name: 'Sneha', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 280 },
+          { name: 'Amit', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 220 },
+          { name: 'Rohan', grade: grade || 'Grade 7', school: school || 'exscl-02', xp: 160 },
         ];
         let mockIndex = 0;
         while (schoolPlayers.length < 4 && mockIndex < baseMocks.length) {
@@ -201,7 +222,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
             name: `${name} (You)`,
             grade: grade || 'Grade 7',
             school: school || 'exscl-02',
-            xp: xp,
+            xp: currentXp,
             isSelf: true
           });
         }
@@ -237,7 +258,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
     return () => {
       active = false;
     };
-  }, [school, name, xp, grade]);
+  }, [school, name, xp, grade, hasSeenFairnessResetV1, getFallbackGlobal]);
 
   const games = [
     {
@@ -509,9 +530,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
             </div>
           ) : (
             (() => {
-              const currentLeaderboard = leaderboardTab === 'school' ? leaderboard : globalLeaderboard;
-              const playersWithRank = currentLeaderboard.map((p, idx) => ({ ...p, rank: idx + 1 }));
-              const selfIndex = playersWithRank.findIndex(p => p.isSelf);
+              const rawLeaderboard = leaderboardTab === 'school' ? leaderboard : globalLeaderboard;
+              const currentLeaderboard = (rawLeaderboard && rawLeaderboard.length > 0) ? rawLeaderboard : getFallbackGlobal();
+              const playersWithRank = currentLeaderboard.map((p: any, idx: number) => ({ ...p, rank: idx + 1 }));
+              const selfIndex = playersWithRank.findIndex((p: any) => p.isSelf);
               const selfRank = selfIndex >= 0 ? selfIndex + 1 : 1;
               const selfPlayer = selfIndex >= 0 ? playersWithRank[selfIndex] : { name: name, grade: grade, school: school, xp: displayXp, isSelf: true, rank: 1 };
 
@@ -523,6 +545,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onSelectGame, onOpenSettin
                   ...playersWithRank.slice(0, 3),
                   selfPlayer
                 ];
+              }
+
+              while (dashboardPlayers.length < 4) {
+                const fillIndex = dashboardPlayers.length + 1;
+                dashboardPlayers.push({
+                  name: `Player ${fillIndex}`,
+                  grade: grade || 'Grade 7',
+                  school: school || 'exscl-02',
+                  xp: 0,
+                  isSelf: false,
+                  rank: fillIndex
+                });
               }
 
               const podiumPositions = [

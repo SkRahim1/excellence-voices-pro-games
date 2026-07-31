@@ -179,86 +179,103 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
           gap: '0.5rem',
           paddingRight: '0.25rem' 
         }}>
-          {displayPlayers.map((player) => {
-            const isGold = player.rank === 1;
-            const isSilver = player.rank === 2;
-            const isBronze = player.rank === 3;
-            
-            return (
-              <div 
-                key={player.rank}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.8rem 1rem',
-                  borderRadius: '12px',
-                  background: player.isSelf 
-                    ? 'var(--accent-gradient)' 
-                    : 'rgba(255, 255, 255, 0.03)',
-                  border: player.isSelf 
-                    ? '1.5px solid var(--accent-cyan)' 
-                    : '1px solid rgba(255, 255, 255, 0.05)',
-                  boxShadow: player.isSelf 
-                    ? '0 4px 12px var(--accent-glow)' 
-                    : 'none',
-                  color: player.isSelf ? '#ffffff' : 'var(--text-main)',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {/* Rank indicator */}
-                <div style={{ width: '45px', display: 'flex', alignItems: 'center', fontWeight: 800 }}>
-                  {isGold ? (
-                    <Medal style={{ color: '#fbbf24', width: '22px', height: '22px' }} />
-                  ) : isSilver ? (
-                    <Medal style={{ color: '#9ca3af', width: '22px', height: '22px' }} />
-                  ) : isBronze ? (
-                    <Medal style={{ color: '#b45309', width: '22px', height: '22px' }} />
-                  ) : (
-                    <span style={{ fontSize: '0.95rem', color: player.isSelf ? '#ffffff' : 'var(--text-muted)', marginLeft: '4px' }}>
-                      #{player.rank}
-                    </span>
-                  )}
-                </div>
-
-                {/* Player details */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
-                    {player.name.replace(' (You)', '')} {player.isSelf && '🏆'}
-                  </div>
-                  <div style={{ 
-                    display: 'flex', 
-                    flexWrap: 'wrap', 
-                    alignItems: 'center', 
-                    gap: '0.4rem', 
-                    fontSize: '0.75rem', 
-                    color: player.isSelf ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)' 
-                  }}>
-                    <span>{player.grade}</span>
-                    {activeTab === 'global' && player.school && (
-                      <>
-                        <span style={{ opacity: 0.5 }}>•</span>
-                        <span style={{
-                          background: player.isSelf ? 'rgba(255,255,255,0.2)' : 'rgba(255, 255, 255, 0.05)',
-                          padding: '1px 6px',
-                          borderRadius: '4px',
-                          fontSize: '0.68rem',
-                          fontWeight: 700
-                        }}>
-                          {getSchoolName(player.school)}
-                        </span>
-                      </>
+          {displayPlayers.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '2rem 1rem',
+              color: 'var(--text-muted)',
+              fontSize: '0.9rem',
+              fontWeight: 600
+            }}>
+              No standings available yet.
+            </div>
+          ) : (
+            displayPlayers.map((player) => {
+              const isGold = player.rank === 1;
+              const isSilver = player.rank === 2;
+              const isBronze = player.rank === 3;
+              
+              return (
+                <div 
+                  key={player.rank}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.8rem 1rem',
+                    borderRadius: '12px',
+                    background: player.isSelf 
+                      ? (theme === 'kids' ? 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)' : 'var(--accent-gradient)') 
+                      : (theme === 'kids' ? '#f0f9ff' : 'var(--level-card-bg)'),
+                    border: player.isSelf 
+                      ? '1.5px solid var(--accent-cyan)' 
+                      : (theme === 'kids' ? '1.5px solid #bae6fd' : '1px solid var(--border-divider)'),
+                    boxShadow: player.isSelf 
+                      ? '0 4px 12px var(--accent-glow)' 
+                      : 'none',
+                    color: player.isSelf ? '#ffffff' : 'var(--text-main)',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {/* Rank indicator */}
+                  <div style={{ width: '45px', display: 'flex', alignItems: 'center', fontWeight: 800 }}>
+                    {isGold ? (
+                      <Medal style={{ color: '#fbbf24', width: '22px', height: '22px' }} />
+                    ) : isSilver ? (
+                      <Medal style={{ color: '#9ca3af', width: '22px', height: '22px' }} />
+                    ) : isBronze ? (
+                      <Medal style={{ color: '#b45309', width: '22px', height: '22px' }} />
+                    ) : (
+                      <span style={{ fontSize: '0.95rem', color: player.isSelf ? '#ffffff' : 'var(--text-muted)', marginLeft: '4px' }}>
+                        #{player.rank}
+                      </span>
                     )}
                   </div>
-                </div>
 
-                {/* XP Count */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 800 }}>
-                  <Award style={{ width: '16px', height: '16px', color: player.isSelf ? '#ffffff' : 'var(--accent-cyan)' }} />
-                  <span style={{ fontSize: '0.95rem' }}>{player.xp} XP</span>
+                  {/* Player details */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>
+                      {player.name.replace(' (You)', '')} {player.isSelf && '🏆'}
+                    </div>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexWrap: 'wrap', 
+                      alignItems: 'center', 
+                      gap: '0.4rem', 
+                      fontSize: '0.75rem', 
+                      color: player.isSelf ? 'rgba(255,255,255,0.75)' : 'var(--text-muted)' 
+                    }}>
+                      <span>{player.grade}</span>
+                      {activeTab === 'global' && player.school && (
+                        <>
+                          <span style={{ opacity: 0.5 }}>•</span>
+                          <span style={{
+                            background: player.isSelf 
+                              ? 'rgba(255,255,255,0.2)' 
+                              : (theme === 'kids' ? '#e0f2fe' : 'var(--btn-bg-ghost)'),
+                            color: player.isSelf
+                              ? '#ffffff'
+                              : (theme === 'kids' ? '#0369a1' : 'var(--text-muted)'),
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            fontSize: '0.68rem',
+                            fontWeight: 700
+                          }}>
+                            {getSchoolName(player.school)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* XP Count */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 800 }}>
+                    <Award style={{ width: '16px', height: '16px', color: player.isSelf ? '#ffffff' : 'var(--accent-cyan)' }} />
+                    <span style={{ fontSize: '0.95rem' }}>{player.xp} XP</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
 
           {/* If the current student is not in the top display list, append them at the bottom with a divider */}
           {!isSelfInDisplayList && selfPlayer && (
@@ -274,9 +291,9 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                 fontSize: '0.9rem',
                 fontWeight: 600
               }}>
-                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+                <div style={{ flex: 1, height: '1px', background: 'var(--border-divider)' }} />
                 <span>• • •</span>
-                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+                <div style={{ flex: 1, height: '1px', background: 'var(--border-divider)' }} />
               </div>
 
               {/* Current student row */}
@@ -286,7 +303,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   alignItems: 'center',
                   padding: '0.8rem 1rem',
                   borderRadius: '12px',
-                  background: 'var(--accent-gradient)',
+                  background: theme === 'kids' ? 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)' : 'var(--accent-gradient)',
                   border: '1.5px solid var(--accent-cyan)',
                   boxShadow: '0 4px 12px var(--accent-glow)',
                   color: '#ffffff',
