@@ -4,7 +4,7 @@ export const SCHOOL_MAPPING: Record<string, string> = {
   'exscl-03': 'Vashistha Model school, bollaram',
   'exscl-04': 'Jeevan Jyothi School',
   'exscl-05': 'Sangamithra School, Dammaiguda',
-  'exscl-06': 'Sri Vaagdevi School (main branch)',
+  'exscl-06': 'Shree Vaagdevi High School (Main Branch)',
   'exscl-07': 'Glorious School',
   'exscl-08': 'Sree Gouthami High School',
   'exscl-09': 'KVR High School',
